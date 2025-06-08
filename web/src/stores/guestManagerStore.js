@@ -1,0 +1,185 @@
+import { defineStore } from 'pinia'
+import { reactive } from 'vue'
+
+const guestManagerList = [
+  {
+    id: 1001,
+    template_id: 1,
+    name: 'Alice Smith',
+    group: 'Family of Groom',
+    person: 1,
+    tags: ['vegan', '+1'],
+    telp: '+628111500998',
+    address: 'Jakarta Selatan',
+    message: 'Congrats!',
+    attend: true,
+    view_at: new Date('2025-06-01T10:00:00Z'),
+    created_at: new Date('2025-06-01T10:00:00Z'),
+    updated_at: new Date('2025-06-01T10:10:00Z'),
+  },
+  {
+    id: 1002,
+    template_id: 1,
+    name: 'Budi Hartono',
+    group: 'Friends of Groom',
+    person: 1,
+    tags: ['no alcohol'],
+    telp: '+6282234567891',
+    address: 'Bandung',
+    message: '',
+    attend: false,
+    view_at: null,
+    created_at: new Date('2025-06-01T11:00:00Z'),
+    updated_at: new Date('2025-06-01T11:05:00Z'),
+  },
+  {
+    id: 1003,
+    template_id: 1,
+    name: 'Citra Dewi',
+    person: 1,
+    group: 'Friends of Bride',
+    tags: ['vegetarian', '+1'],
+    telp: '+6283234567892',
+    address: 'Surabaya',
+    message: 'Can’t wait!',
+    attend: true,
+    view_at: new Date('2025-06-02T09:15:00Z'),
+    created_at: new Date('2025-06-02T09:15:00Z'),
+    updated_at: new Date('2025-06-02T09:20:00Z'),
+  },
+  {
+    id: 1004,
+    template_id: 1,
+    name: 'Dewi Lestari',
+    person: 1,
+    group: 'VIP',
+    tags: [],
+    telp: '+6284234567893',
+    address: '',
+    message: '',
+    attend: false,
+    view_at: null,
+    created_at: new Date('2025-06-03T08:00:00Z'),
+    updated_at: new Date('2025-06-03T08:01:00Z'),
+  },
+  {
+    id: 1005,
+    template_id: 1,
+    name: 'Erik Prasetyo',
+    person: 1,
+    group: 'Colleagues',
+    tags: ['confirmed by phone'],
+    telp: '+6285234567894',
+    address: 'Depok',
+    message: 'Thanks for the invite!',
+    attend: true,
+    view_at: new Date('2025-06-01T13:00:00Z'),
+    created_at: new Date('2025-06-01T13:00:00Z'),
+    updated_at: new Date('2025-06-01T13:15:00Z'),
+  },
+  {
+    id: 1006,
+    template_id: 1,
+    name: 'Fatimah Zahra',
+    person: 1,
+    group: 'Family of Bride',
+    tags: ['halal'],
+    telp: '+6286234567895',
+    address: 'Yogyakarta',
+    message: '',
+    attend: true,
+    view_at: new Date('2025-06-04T10:30:00Z'),
+    created_at: new Date('2025-06-04T10:30:00Z'),
+    updated_at: new Date('2025-06-04T10:35:00Z'),
+  },
+  {
+    id: 1007,
+    template_id: 1,
+    name: 'Gilang Ramadhan',
+    group: 'School Friends',
+    tags: ['+1', 'no kids'],
+    person: 1,
+    telp: '+6287234567896',
+    address: 'Bogor',
+    message: '',
+    attend: false,
+    view_at: null,
+    created_at: new Date('2025-06-01T14:20:00Z'),
+    updated_at: new Date('2025-06-01T14:20:00Z'),
+  },
+  {
+    id: 1008,
+    template_id: 1,
+    name: 'Hana Putri',
+    group: 'College Friends',
+    tags: ['vegetarian'],
+    telp: '+6288234567897',
+    person: 10,
+    address: 'Semarang',
+    message: 'See you there!',
+    attend: true,
+    view_at: new Date('2025-06-03T16:00:00Z'),
+    created_at: new Date('2025-06-03T16:00:00Z'),
+    updated_at: new Date('2025-06-03T16:10:00Z'),
+  },
+  {
+    id: 1009,
+    template_id: 1,
+    name: 'Indra Kusuma',
+    group: 'Neighbors',
+    tags: [],
+    telp: '+6289234567898',
+    address: '',
+    person: 1,
+    message: '',
+    attend: false,
+    view_at: null,
+    created_at: new Date('2025-06-01T15:00:00Z'),
+    updated_at: new Date('2025-06-01T15:05:00Z'),
+  },
+  {
+    id: 1010,
+    template_id: 1,
+    name: 'Joko Santoso',
+    group: 'Others',
+    tags: ['sent gift'],
+    telp: '+6280234567899',
+    address: 'Bali',
+    message: 'Sending love and blessings.',
+    person: 1,
+    attend: false,
+    view_at: null,
+    created_at: new Date('2025-06-01T16:30:00Z'),
+    updated_at: new Date('2025-06-01T16:35:00Z'),
+  },
+]
+
+export const useGuestManagerStore = defineStore('guestManager', {
+  state: () => ({
+    list: [],
+  }),
+  getters: {
+    getGuestByTemplateID(state) {
+      return (id) => {
+        return (state.list.filter(e => e.template_id == id) || [])
+      }
+    },
+  },
+  actions: {
+    fetch() {
+      this.list = guestManagerList.map(e => e)
+    },
+    delete(id = "") {
+      this.list = this.list.filter(user => user.id !== id);
+    },
+    create(data = {}) {
+      this.list.push(data);
+    },
+    update(id, data = {}) {
+      const index = this.list.findIndex(user => user.id === id);
+      if (index !== -1) {
+        this.list[index] = { ...this.list[index], ...data };
+      }
+    },
+  },
+});
