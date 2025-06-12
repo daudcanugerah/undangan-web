@@ -4,7 +4,7 @@ import { useToast } from 'primevue/usetoast';
 import { toRaw } from 'vue';
 import { storeToRefs } from 'pinia'
 import { valibotResolver } from '@primevue/forms/resolvers/valibot';
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useUserStore } from '@/stores/userStores';
 import { useAuthUser } from '@/stores/authStore';
 import InputText from 'primevue/inputtext';
@@ -15,6 +15,8 @@ const authUserStore = useAuthUser()
 const userStore = useUserStore()
 const router = useRouter()
 const toast = useToast();
+
+const isAdmin = ref(false)
 
 const formData = ref()
 
@@ -31,12 +33,16 @@ const schema = v.object({
   ),
 });
 
+onMounted(() => {
+  isAdmin.value = router.currentRoute.value.path == "/admin/login"
+  console.log(router.path)
+})
+
 const resolver = valibotResolver(schema)
 
 const onFormSubmit = ({ valid, values }) => {
   if (valid) {
-
-    let authUser = userStore.findByCredential(values.username, values.password, 2)
+    let authUser = userStore.findByCredential(values.username, values.password, router.currentRoute.value.name == "admin.login" ? 1 : 2)
     if (!authUser?.id) {
       toast.add({ severity: 'error', summary: 'Invalid credentials.', life: 3000 });
       return;
@@ -83,8 +89,13 @@ function submitForm() {
           <div class="text-surface-900 dark:text-surface-0 text-2xl font-semibold leading-tight text-center w-full">
             Invitation Online APP</div>
           <div class="text-center w-full">
-            <span class="text-surface-700 dark:text-surface-200 leading-normal">Don't have an account?</span>
-            <a class="text-primary font-medium ml-1 cursor-pointer hover:text-primary-emphasis">Create today!</a>
+            <span v-if="!isAdmin" class="text-surface-700 dark:text-surface-200 leading-normal">Don't have an
+              account?</span>
+
+            <a v-if="!isAdmin" class="text-primary font-medium ml-1 cursor-pointer hover:text-primary-emphasis">Create
+              today!</a>
+            <span v-if="isAdmin" class="text-surface-700 dark:text-surface-200 leading-normal">Welcome Back
+              Admin</span>
           </div>
         </div>
       </div>

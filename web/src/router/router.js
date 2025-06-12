@@ -10,8 +10,8 @@ import Layout from "@/components/Layout.vue"
 
 
 const adminRoutes = [
-  { path: '/admin/login', component: Login, name: "admin-login" },
-  { path: '/user/login', component: Login, name: "user-login" },
+  { path: '/admin/login', component: Login, name: "admin.login" },
+  { path: '/user/login', component: Login, name: "user.login" },
   {
     component: Layout, path: '/user', children: [
       { path: '/user/browse', component: BrowseTemplateView, name: "user.browse" },

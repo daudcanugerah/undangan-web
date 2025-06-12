@@ -1,0 +1,19 @@
+[otel]
+metric = true
+trace = false
+log = true
+
+[mongo]
+dsn = "mongodb://user:pass@localhost:27017"
+database = "my_database"
+max_time_ms = 5000
+
+[nats]
+dsn = "nats://localhost:4222"
+
+[app]
+timezone = "Asia/Jakarta"
+proxy_url = "http://localhost:8080"
+
+[debug]
+profiler_addr = "localhost:6060"

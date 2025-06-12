@@ -32,6 +32,10 @@
     deleteTemplateManagerDialog.value = true
   }
 
+  onMounted(() => {
+    templateManagerStore.fetch()
+  })
+
 
 </script>
 
