@@ -7,18 +7,14 @@
 
 package model
 
-import (
-	"time"
-)
-
 type Users struct {
-	ID        string `sql:"primary_key"`
-	Email     string
-	Password  string
+	ID        *string `sql:"primary_key"`
+	Username  string
 	Name      string
-	Profile   string
+	Password  string
+	Email     string
 	Role      int32
-	IsActive  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Profile   *string
+	CreatedAt string
+	UpdatedAt string
 }

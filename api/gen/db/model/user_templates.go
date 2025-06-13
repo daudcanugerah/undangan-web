@@ -7,17 +7,21 @@
 
 package model
 
+import (
+	"time"
+)
+
 type UserTemplates struct {
-	ID                 *string `sql:"primary_key"`
-	UserID             string
-	BaseUserTemplateID string
-	State              *int32
-	Slug               string
-	URL                string
-	MessageTemplate    string
-	Name               string
-	CoverImage         *string
-	CreatedAt          string
-	UpdatedAt          string
-	ExpireAt           string
+	ID              string `sql:"primary_key"`
+	UserID          string
+	BaseTemplateID  string
+	State           int32
+	Slug            string
+	URL             string
+	MessageTemplate string
+	Name            string
+	CoverImage      string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	ExpireAt        time.Time
 }

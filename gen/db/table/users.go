@@ -18,14 +18,14 @@ type usersTable struct {
 
 	// Columns
 	ID        sqlite.ColumnString
-	Email     sqlite.ColumnString
-	Password  sqlite.ColumnString
+	Username  sqlite.ColumnString
 	Name      sqlite.ColumnString
-	Profile   sqlite.ColumnString
+	Password  sqlite.ColumnString
+	Email     sqlite.ColumnString
 	Role      sqlite.ColumnInteger
-	IsActive  sqlite.ColumnBool
-	CreatedAt sqlite.ColumnTimestamp
-	UpdatedAt sqlite.ColumnTimestamp
+	Profile   sqlite.ColumnString
+	CreatedAt sqlite.ColumnString
+	UpdatedAt sqlite.ColumnString
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
@@ -68,17 +68,17 @@ func newUsersTable(schemaName, tableName, alias string) *UsersTable {
 func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 	var (
 		IDColumn        = sqlite.StringColumn("id")
-		EmailColumn     = sqlite.StringColumn("email")
-		PasswordColumn  = sqlite.StringColumn("password")
+		UsernameColumn  = sqlite.StringColumn("username")
 		NameColumn      = sqlite.StringColumn("name")
-		ProfileColumn   = sqlite.StringColumn("profile")
+		PasswordColumn  = sqlite.StringColumn("password")
+		EmailColumn     = sqlite.StringColumn("email")
 		RoleColumn      = sqlite.IntegerColumn("role")
-		IsActiveColumn  = sqlite.BoolColumn("is_active")
-		CreatedAtColumn = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn = sqlite.TimestampColumn("updated_at")
-		allColumns      = sqlite.ColumnList{IDColumn, EmailColumn, PasswordColumn, NameColumn, ProfileColumn, RoleColumn, IsActiveColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns  = sqlite.ColumnList{EmailColumn, PasswordColumn, NameColumn, ProfileColumn, RoleColumn, IsActiveColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns  = sqlite.ColumnList{ProfileColumn, IsActiveColumn, CreatedAtColumn, UpdatedAtColumn}
+		ProfileColumn   = sqlite.StringColumn("profile")
+		CreatedAtColumn = sqlite.StringColumn("created_at")
+		UpdatedAtColumn = sqlite.StringColumn("updated_at")
+		allColumns      = sqlite.ColumnList{IDColumn, UsernameColumn, NameColumn, PasswordColumn, EmailColumn, RoleColumn, ProfileColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns  = sqlite.ColumnList{UsernameColumn, NameColumn, PasswordColumn, EmailColumn, RoleColumn, ProfileColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns  = sqlite.ColumnList{}
 	)
 
 	return usersTable{
@@ -86,12 +86,12 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 
 		//Columns
 		ID:        IDColumn,
-		Email:     EmailColumn,
-		Password:  PasswordColumn,
+		Username:  UsernameColumn,
 		Name:      NameColumn,
-		Profile:   ProfileColumn,
+		Password:  PasswordColumn,
+		Email:     EmailColumn,
 		Role:      RoleColumn,
-		IsActive:  IsActiveColumn,
+		Profile:   ProfileColumn,
 		CreatedAt: CreatedAtColumn,
 		UpdatedAt: UpdatedAtColumn,
 

@@ -17,18 +17,18 @@ type userTemplatesTable struct {
 	sqlite.Table
 
 	// Columns
-	ID                 sqlite.ColumnString
-	UserID             sqlite.ColumnString
-	BaseUserTemplateID sqlite.ColumnString
-	State              sqlite.ColumnInteger
-	Slug               sqlite.ColumnString
-	URL                sqlite.ColumnString
-	MessageTemplate    sqlite.ColumnString
-	Name               sqlite.ColumnString
-	CoverImage         sqlite.ColumnString
-	CreatedAt          sqlite.ColumnString
-	UpdatedAt          sqlite.ColumnString
-	ExpireAt           sqlite.ColumnString
+	ID              sqlite.ColumnString
+	UserID          sqlite.ColumnString
+	BaseTemplateID  sqlite.ColumnString
+	State           sqlite.ColumnInteger
+	Slug            sqlite.ColumnString
+	URL             sqlite.ColumnString
+	MessageTemplate sqlite.ColumnString
+	Name            sqlite.ColumnString
+	CoverImage      sqlite.ColumnString
+	CreatedAt       sqlite.ColumnTimestamp
+	UpdatedAt       sqlite.ColumnTimestamp
+	ExpireAt        sqlite.ColumnTimestamp
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
@@ -70,39 +70,39 @@ func newUserTemplatesTable(schemaName, tableName, alias string) *UserTemplatesTa
 
 func newUserTemplatesTableImpl(schemaName, tableName, alias string) userTemplatesTable {
 	var (
-		IDColumn                 = sqlite.StringColumn("id")
-		UserIDColumn             = sqlite.StringColumn("user_id")
-		BaseUserTemplateIDColumn = sqlite.StringColumn("base_user_template_id")
-		StateColumn              = sqlite.IntegerColumn("state")
-		SlugColumn               = sqlite.StringColumn("slug")
-		URLColumn                = sqlite.StringColumn("url")
-		MessageTemplateColumn    = sqlite.StringColumn("message_template")
-		NameColumn               = sqlite.StringColumn("name")
-		CoverImageColumn         = sqlite.StringColumn("cover_image")
-		CreatedAtColumn          = sqlite.StringColumn("created_at")
-		UpdatedAtColumn          = sqlite.StringColumn("updated_at")
-		ExpireAtColumn           = sqlite.StringColumn("expire_at")
-		allColumns               = sqlite.ColumnList{IDColumn, UserIDColumn, BaseUserTemplateIDColumn, StateColumn, SlugColumn, URLColumn, MessageTemplateColumn, NameColumn, CoverImageColumn, CreatedAtColumn, UpdatedAtColumn, ExpireAtColumn}
-		mutableColumns           = sqlite.ColumnList{UserIDColumn, BaseUserTemplateIDColumn, StateColumn, SlugColumn, URLColumn, MessageTemplateColumn, NameColumn, CoverImageColumn, CreatedAtColumn, UpdatedAtColumn, ExpireAtColumn}
-		defaultColumns           = sqlite.ColumnList{}
+		IDColumn              = sqlite.StringColumn("id")
+		UserIDColumn          = sqlite.StringColumn("user_id")
+		BaseTemplateIDColumn  = sqlite.StringColumn("base_template_id")
+		StateColumn           = sqlite.IntegerColumn("state")
+		SlugColumn            = sqlite.StringColumn("slug")
+		URLColumn             = sqlite.StringColumn("url")
+		MessageTemplateColumn = sqlite.StringColumn("message_template")
+		NameColumn            = sqlite.StringColumn("name")
+		CoverImageColumn      = sqlite.StringColumn("cover_image")
+		CreatedAtColumn       = sqlite.TimestampColumn("created_at")
+		UpdatedAtColumn       = sqlite.TimestampColumn("updated_at")
+		ExpireAtColumn        = sqlite.TimestampColumn("expire_at")
+		allColumns            = sqlite.ColumnList{IDColumn, UserIDColumn, BaseTemplateIDColumn, StateColumn, SlugColumn, URLColumn, MessageTemplateColumn, NameColumn, CoverImageColumn, CreatedAtColumn, UpdatedAtColumn, ExpireAtColumn}
+		mutableColumns        = sqlite.ColumnList{UserIDColumn, BaseTemplateIDColumn, StateColumn, SlugColumn, URLColumn, MessageTemplateColumn, NameColumn, CoverImageColumn, CreatedAtColumn, UpdatedAtColumn, ExpireAtColumn}
+		defaultColumns        = sqlite.ColumnList{StateColumn, URLColumn, MessageTemplateColumn, NameColumn, CoverImageColumn, CreatedAtColumn, UpdatedAtColumn, ExpireAtColumn}
 	)
 
 	return userTemplatesTable{
 		Table: sqlite.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:                 IDColumn,
-		UserID:             UserIDColumn,
-		BaseUserTemplateID: BaseUserTemplateIDColumn,
-		State:              StateColumn,
-		Slug:               SlugColumn,
-		URL:                URLColumn,
-		MessageTemplate:    MessageTemplateColumn,
-		Name:               NameColumn,
-		CoverImage:         CoverImageColumn,
-		CreatedAt:          CreatedAtColumn,
-		UpdatedAt:          UpdatedAtColumn,
-		ExpireAt:           ExpireAtColumn,
+		ID:              IDColumn,
+		UserID:          UserIDColumn,
+		BaseTemplateID:  BaseTemplateIDColumn,
+		State:           StateColumn,
+		Slug:            SlugColumn,
+		URL:             URLColumn,
+		MessageTemplate: MessageTemplateColumn,
+		Name:            NameColumn,
+		CoverImage:      CoverImageColumn,
+		CreatedAt:       CreatedAtColumn,
+		UpdatedAt:       UpdatedAtColumn,
+		ExpireAt:        ExpireAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

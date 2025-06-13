@@ -43,15 +43,6 @@ type Config struct {
 	DBMongo DbMongoConfig `mapstructure:"mongo"`
 	Nats    NatsConfig    `mapstructure:"nats"`
 	App     AppConfig     `mapstructure:"app"`
-	Debug   DebugConfig   `mapstructure:"debug"`
-}
-
-// GetProfilerAddress ...
-func (c *Config) GetProfilerAddress() string {
-	if c.Debug.ProfilerAddress == "" {
-		return "localhost:21780"
-	}
-	return c.Debug.ProfilerAddress
 }
 
 // GetMaxTimeMs ...

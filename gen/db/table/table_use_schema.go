@@ -10,8 +10,8 @@ package table
 // UseSchema sets a new schema name for all generated table SQL builder types. It is recommended to invoke
 // this method only once at the beginning of the program.
 func UseSchema(schema string) {
-	Guests = Guests.FromSchema(schema)
-	PublicTemplates = PublicTemplates.FromSchema(schema)
+	GuestManagers = GuestManagers.FromSchema(schema)
+	Templates = Templates.FromSchema(schema)
 	UserTemplates = UserTemplates.FromSchema(schema)
 	Users = Users.FromSchema(schema)
 }
