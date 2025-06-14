@@ -1,5 +1,5 @@
 package: api
 generate:
-  chi-server: true
+  chi-server: false
   models: true
   client: false

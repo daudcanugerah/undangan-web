@@ -1,34 +1,173 @@
-
-openapi: 3.0.3
+openapi: 3.0.0
 info:
   title: Online Invitation API
   version: 1.0.0
-  description: API for managing user invitations, templates, and guest RSVPs
+  description: API for managing wedding invitations and guests
 
 servers:
-  - url: https://api.example.com
+  - url: https://api.example.com/v1
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        profile:
+          type: string
+        role:
+          type: integer
+          enum: [1, 2]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PublicTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        priceInterval:
+          type: string
+        price:
+          type: integer
+        type:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        coverImage:
+          type: string
+        state:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UserTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        baseTemplateId:
+          type: string
+        state:
+          type: integer
+        slug:
+          type: string
+        url:
+          type: string
+        messageTemplate:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/MessageTemplate'
+        name:
+          type: string
+        coverImage:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        expireAt:
+          type: string
+          format: date-time
+    MessageTemplate:
+      type: object
+      properties:
+        text:
+          type: string
+        provider:
+          type: string
+    Guest:
+      type: object
+      properties:
+        id:
+          type: string
+        userTemplateId:
+          type: string
+        name:
+          type: string
+        group:
+          type: string
+        person:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        telp:
+          type: string
+        address:
+          type: string
+        message:
+          type: string
+        attend:
+          type: boolean
+        viewAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
 
 paths:
-  /auth/register:
-    post:
-      summary: Register a new user
-      tags: [Auth]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegisterRequest'
-      responses:
-        '201':
-          description: User registered successfully
-        '400':
-          description: Invalid input
-
   /auth/login:
     post:
-      summary: Authenticate user and get token
-      tags: [Auth]
+      tags:
+        - Auth
+      summary: User login
       requestBody:
         required: true
         content:
@@ -37,46 +176,76 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Authentication successful
+          description: Successful login
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: '#/components/schemas/LoginResponse'
         '401':
           description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /admin/login:
+  /auth/register:
     post:
-      summary: Authenticate admin
-      tags: [AdminAuth]
+      tags:
+        - Auth
+      summary: Register new user
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminLoginRequest'
+              $ref: '#/components/schemas/User'
       responses:
-        '200':
-          description: Admin authentication successful
+        '201':
+          description: User created successfully
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '401':
-          description: Invalid admin credentials
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /admin/users/{user_id}/state:
-    patch:
-      summary: Activate or deactivate a user
-      tags: [Admin]
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: User logout
       security:
         - bearerAuth: []
-      parameters:
-        - name: user_id
-          in: path
-          required: true
-          schema:
-            type: string
+      responses:
+        '200':
+          description: Successfully logged out
+        '401':
+          description: Unauthorized
+
+  /users:
+    get:
+      tags:
+        - User Manager
+      summary: List all users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+    patch:
+      tags:
+        - User Manager
+      summary: Change user state
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -84,21 +253,65 @@ paths:
             schema:
               type: object
               properties:
-                state:
-                  type: integer
-                  enum: [0, 1]
+                userId:
+                  type: string
+                isActive:
+                  type: boolean
       responses:
-        '204':
+        '200':
           description: User state updated
         '401':
           description: Unauthorized
-        '403':
-          description: Forbidden
+        '404':
+          description: User not found
 
-  /admin/templates:
+  /users/{id}:
+    get:
+      tags:
+        - User Manager
+      summary: Get user by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
+
+  /public-templates:
+    get:
+      tags:
+        - Public Template Manager
+      summary: List all public templates
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of public templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicTemplate'
+        '401':
+          description: Unauthorized
     post:
-      summary: Create a new template
-      tags: [Admin]
+      tags:
+        - Public Template Manager
+      summary: Create a new public template
       security:
         - bearerAuth: []
       requestBody:
@@ -106,17 +319,41 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Template'
+              $ref: '#/components/schemas/PublicTemplate'
       responses:
         '201':
           description: Template created
         '401':
           description: Unauthorized
 
-  /admin/templates/{id}:
+  /public-templates/{id}:
+    get:
+      tags:
+        - Public Template Manager
+      summary: Get public template by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Public template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicTemplate'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Public template not found
     put:
-      summary: Update existing template
-      tags: [Admin]
+      tags:
+        - Public Template Manager
+      summary: Update a public template
       security:
         - bearerAuth: []
       parameters:
@@ -130,67 +367,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Template'
+              $ref: '#/components/schemas/PublicTemplate'
       responses:
-        '204':
+        '200':
           description: Template updated
         '401':
           description: Unauthorized
-
-  /admin/user-templates:
-    post:
-      summary: Assign a template to a user
-      tags: [Admin]
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserTemplate'
-      responses:
-        '201':
-          description: User template created
-        '401':
-          description: Unauthorized
-
-  /templates:
-    get:
-      summary: Get all public templates
-      tags: [User]
-      responses:
-        '200':
-          description: A list of templates
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Template'
-
-  /user-templates:
-    get:
-      summary: Get current user's templates
-      tags: [User]
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: A list of user templates
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserTemplate'
-        '401':
-          description: Unauthorized
-
-  /user-templates/{id}:
+        '404':
+          description: Template not found
     delete:
-      summary: Delete a user template
-      tags: [User]
+      tags:
+        - Public Template Manager
+      summary: Delete a public template
       security:
         - bearerAuth: []
       parameters:
@@ -204,11 +392,136 @@ paths:
           description: Template deleted
         '401':
           description: Unauthorized
+        '404':
+          description: Template not found
+
+  /user-templates:
+    get:
+      tags:
+        - User Template Manager
+      summary: List all user templates
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of user templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserTemplate'
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - User Template Manager
+      summary: Create a new user template
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTemplate'
+      responses:
+        '201':
+          description: Template created
+        '401':
+          description: Unauthorized
+
+  /user-templates/{id}:
+    get:
+      tags:
+        - User Template Manager
+      summary: Get user template by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTemplate'
+        '401':
+          description: Unauthorized
+        '404':
+          description: User template not found
+    put:
+      tags:
+        - User Template Manager
+      summary: Update a user template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTemplate'
+      responses:
+        '200':
+          description: Template updated
+        '401':
+          description: Unauthorized
+        '404':
+          description: Template not found
+    delete:
+      tags:
+        - User Template Manager
+      summary: Delete a user template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Template deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Template not found
 
   /guests:
+    get:
+      tags:
+        - Guest Manager
+      summary: List all guests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of guests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Guest'
+        '401':
+          description: Unauthorized
     post:
-      summary: Add a new guest
-      tags: [GuestManager]
+      tags:
+        - Guest Manager
+      summary: Create a new guest
       security:
         - bearerAuth: []
       requestBody:
@@ -219,44 +532,19 @@ paths:
               $ref: '#/components/schemas/Guest'
       responses:
         '201':
-          description: Guest added
+          description: Guest created
         '401':
           description: Unauthorized
 
   /guests/{id}:
-    patch:
-      summary: Update guest details
-      tags: [GuestManager]
+    get:
+      tags:
+        - Guest Manager
+      summary: Get guest by ID
       security:
         - bearerAuth: []
       parameters:
         - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Guest'
-      responses:
-        '204':
-          description: Guest updated
-        '401':
-          description: Unauthorized
-
-  /invite/{template_id}/guest/{guest_id}:
-    get:
-      summary: Public view of guest invitation
-      tags: [Public]
-      parameters:
-        - name: template_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: guest_id
           in: path
           required: true
           schema:
@@ -268,119 +556,96 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Guest'
-
-  /invite/{template_id}/guest/{guest_id}/rsvp:
-    patch:
-      summary: RSVP and send a message
-      tags: [Public]
+        '401':
+          description: Unauthorized
+        '404':
+          description: Guest not found
+    put:
+      tags:
+        - Guest Manager
+      summary: Update a guest (except name)
       security:
         - bearerAuth: []
       parameters:
-        - name: template_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: guest_id
+        - name: id
           in: path
           required: true
           schema:
             type: string
       requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Guest'
+      responses:
+        '200':
+          description: Guest updated
+        '401':
+          description: Unauthorized
+        '404':
+          description: Guest not found
+    delete:
+      tags:
+        - Guest Manager
+      summary: Delete a guest
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Guest deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Guest not found
+
+  /public/guests/{id}:
+    get:
+      tags:
+        - Public
+      summary: Get guest by ID (no auth required)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Guest details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Guest'
+        '404':
+          description: Guest not found
+    patch:
+      tags:
+        - Public
+      summary: Update guest message (no auth required)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                attend:
-                  type: boolean
                 message:
                   type: string
       responses:
-        '204':
-          description: RSVP updated
-        '401':
-          description: Unauthorized
-
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-  schemas:
-    RegisterRequest:
-      type: object
-      required: [name, email, password]
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-
-    LoginRequest:
-      type: object
-      required: [email, password]
-      properties:
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-
-    AdminLoginRequest:
-      type: object
-      required: [username, password]
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-
-    AuthResponse:
-      type: object
-      properties:
-        access_token:
-          type: string
-        token_type:
-          type: string
-          example: bearer
-
-    Template:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        content:
-          type: string
-
-    UserTemplate:
-      type: object
-      properties:
-        template_id:
-          type: string
-        user_id:
-          type: string
-        state:
-          type: integer
-        expire_at:
-          type: string
-          format: date-time
-
-    Guest:
-      type: object
-      properties:
-        name:
-          type: string
-        message:
-          type: string
-        attend:
-          type: boolean
-        template_id:
-          type: string
+        '200':
+          description: Message updated
+        '404':
+          description: Guest not found

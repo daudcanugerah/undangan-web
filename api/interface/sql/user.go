@@ -2,13 +2,14 @@ package sql
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
 	"basic-service/domain"
 	"basic-service/gen/db/model"
 	"basic-service/gen/db/table"
 
+	"braces.dev/errtrace"
+	"github.com/go-jet/jet/v2/qrm"
 	sqlite "github.com/go-jet/jet/v2/sqlite"
 )
 
@@ -16,7 +17,10 @@ type UserRepository struct {
 	db *SQLite
 }
 
-var UserNotFoundErr = errors.New("user not found")
+var (
+	UserNotFoundErr = errors.New("user not found")
+	UserExistsErr   = errors.New("user already exists")
+)
 
 func NewUserRepository(db *SQLite) *UserRepository {
 	return &UserRepository{db: db}
@@ -50,7 +54,7 @@ func (r *UserRepository) ListByRole(ctx context.Context, role domain.RoleType, p
 	}
 	err := countStmt.QueryContext(ctx, r.db.db, &total)
 	if err != nil {
-		return UserDataList{}, err
+		return UserDataList{}, errtrace.Wrap(err)
 	}
 
 	// Then get the paginated user data for this role
@@ -77,7 +81,7 @@ func (r *UserRepository) ListByRole(ctx context.Context, role domain.RoleType, p
 	var dbUsers []model.Users
 	err = stmt.QueryContext(ctx, r.db.db, &dbUsers)
 	if err != nil {
-		return UserDataList{}, err
+		return UserDataList{}, errtrace.Wrap(err)
 	}
 
 	// Convert model.Users to domain.User
@@ -121,10 +125,10 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id string) (*domain.Us
 	var dbUser model.Users
 	err := stmt.QueryContext(ctx, r.db.db, &dbUser)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, UserNotFoundErr
+		if errors.Is(err, qrm.ErrNoRows) {
+			return nil, errtrace.Wrap(UserNotFoundErr)
 		}
-		return nil, err
+		return nil, errtrace.Wrap(err)
 	}
 
 	return &domain.User{
@@ -160,10 +164,10 @@ func (r *UserRepository) GetEmail(ctx context.Context, email string) (*domain.Us
 	var dbUser model.Users
 	err := stmt.QueryContext(ctx, r.db.db, &dbUser)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, UserNotFoundErr
+		if errors.Is(err, qrm.ErrNoRows) {
+			return nil, errtrace.Wrap(UserNotFoundErr)
 		}
-		return nil, err
+		return nil, errtrace.Wrap(err)
 	}
 
 	return &domain.User{
@@ -189,5 +193,73 @@ func (r *UserRepository) UpdateUserState(ctx context.Context, id string, isActiv
 	)
 
 	_, err := stmt.ExecContext(ctx, r.db.db)
-	return err
+	return errtrace.Wrap(err)
+}
+
+func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
+	// Check if user already exists
+	existingUser, err := r.GetEmail(ctx, user.Email)
+	if err != nil && !errors.Is(err, UserNotFoundErr) {
+		return errtrace.Wrap(err)
+	}
+	if existingUser != nil {
+		return errtrace.Wrap(UserExistsErr)
+	}
+
+	stmt := table.Users.INSERT(
+		table.Users.ID,
+		table.Users.Email,
+		table.Users.Password,
+		table.Users.Name,
+		table.Users.Role,
+		table.Users.IsActive,
+		table.Users.Profile,
+	).VALUES(
+		sqlite.String(user.ID),
+		sqlite.String(user.Email),
+		sqlite.String(user.Password),
+		sqlite.String(user.Name),
+		sqlite.Int32(int32(user.Role)),
+		sqlite.Bool(user.IsActive),
+		sqlite.String(user.Profile),
+	)
+
+	_, err = stmt.ExecContext(ctx, r.db.db)
+	return errtrace.Wrap(err)
+}
+
+func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
+	stmt := table.Users.UPDATE().
+		SET(
+			table.Users.Email.SET(sqlite.String(user.Email)),
+			table.Users.Name.SET(sqlite.String(user.Name)),
+			table.Users.Profile.SET(sqlite.String(user.Profile)),
+			table.Users.UpdatedAt.SET(sqlite.CURRENT_TIMESTAMP()),
+		).WHERE(
+		table.Users.ID.EQ(sqlite.String(user.ID)),
+	)
+
+	_, err := stmt.ExecContext(ctx, r.db.db)
+	return errtrace.Wrap(err)
+}
+
+func (r *UserRepository) UpdatePassword(ctx context.Context, id, password string) error {
+	stmt := table.Users.UPDATE().
+		SET(
+			table.Users.Password.SET(sqlite.String(password)),
+			table.Users.UpdatedAt.SET(sqlite.CURRENT_TIMESTAMP()),
+		).WHERE(
+		table.Users.ID.EQ(sqlite.String(id)),
+	)
+
+	_, err := stmt.ExecContext(ctx, r.db.db)
+	return errtrace.Wrap(err)
+}
+
+func (r *UserRepository) Delete(ctx context.Context, id string) error {
+	stmt := table.Users.DELETE().
+		WHERE(table.Users.ID.EQ(sqlite.String(id)))
+
+	_, err := stmt.ExecContext(ctx, r.db.db)
+	return errtrace.Wrap(err)
 }

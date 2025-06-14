@@ -28,6 +28,7 @@ type publicTemplatesTable struct {
 	State         sqlite.ColumnInteger
 	CreatedAt     sqlite.ColumnTimestamp
 	UpdatedAt     sqlite.ColumnTimestamp
+	Slug          sqlite.ColumnString
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
@@ -80,8 +81,9 @@ func newPublicTemplatesTableImpl(schemaName, tableName, alias string) publicTemp
 		StateColumn         = sqlite.IntegerColumn("state")
 		CreatedAtColumn     = sqlite.TimestampColumn("created_at")
 		UpdatedAtColumn     = sqlite.TimestampColumn("updated_at")
-		allColumns          = sqlite.ColumnList{IDColumn, NameColumn, DescriptionColumn, PriceIntervalColumn, PriceColumn, TypeColumn, TagsColumn, CoverImageColumn, StateColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns      = sqlite.ColumnList{NameColumn, DescriptionColumn, PriceIntervalColumn, PriceColumn, TypeColumn, TagsColumn, CoverImageColumn, StateColumn, CreatedAtColumn, UpdatedAtColumn}
+		SlugColumn          = sqlite.StringColumn("slug")
+		allColumns          = sqlite.ColumnList{IDColumn, NameColumn, DescriptionColumn, PriceIntervalColumn, PriceColumn, TypeColumn, TagsColumn, CoverImageColumn, StateColumn, CreatedAtColumn, UpdatedAtColumn, SlugColumn}
+		mutableColumns      = sqlite.ColumnList{NameColumn, DescriptionColumn, PriceIntervalColumn, PriceColumn, TypeColumn, TagsColumn, CoverImageColumn, StateColumn, CreatedAtColumn, UpdatedAtColumn, SlugColumn}
 		defaultColumns      = sqlite.ColumnList{DescriptionColumn, PriceIntervalColumn, PriceColumn, TypeColumn, TagsColumn, CoverImageColumn, StateColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
@@ -100,6 +102,7 @@ func newPublicTemplatesTableImpl(schemaName, tableName, alias string) publicTemp
 		State:         StateColumn,
 		CreatedAt:     CreatedAtColumn,
 		UpdatedAt:     UpdatedAtColumn,
+		Slug:          SlugColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

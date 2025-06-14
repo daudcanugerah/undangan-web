@@ -9,6 +9,23 @@ const (
 	RoleUser
 )
 
+type UserClaim struct {
+	ID    string
+	Email string
+	Role  RoleType
+}
+
+type SafeUser struct {
+	ID        string
+	Email     string
+	Name      string
+	Profile   string
+	Role      RoleType
+	IsActive  bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type User struct {
 	ID        string
 	Email     string
@@ -31,6 +48,7 @@ type PublicTemplate struct {
 	Tags          []string
 	CoverImage    string
 	State         int
+	Slug          string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
@@ -47,7 +65,7 @@ type UserTemplate struct {
 	State           int
 	Slug            string
 	URL             string
-	MessageTemplate map[string]MessageTemplate
+	MessageTemplate []MessageTemplate
 	Name            string
 	CoverImage      string
 	CreatedAt       time.Time

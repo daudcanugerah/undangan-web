@@ -12,11 +12,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-// DbMongoConfig ...
-type DbMongoConfig struct {
-	DSN       string `mapstructure:"dsn"`
-	Database  string `mapstructure:"database"`
-	MaxTimeMS int64  `mapstructure:"max_time_ms"`
+// Sqlite ...
+type Sqlite struct {
+	DBFile string `mapstructure:"db_file"`
 }
 
 // RedisConfig ...
@@ -39,19 +37,10 @@ type NatsConfig struct {
 
 // Config ...
 type Config struct {
-	Otel    OtelConfig    `mapstructure:"otel"`
-	DBMongo DbMongoConfig `mapstructure:"mongo"`
-	Nats    NatsConfig    `mapstructure:"nats"`
-	App     AppConfig     `mapstructure:"app"`
-}
-
-// GetMaxTimeMs ...
-func (d *DbMongoConfig) GetMaxTimeMs() time.Duration {
-	if d.MaxTimeMS == 0 {
-		// default 60000ms => 1m
-		return time.Duration(60000)
-	}
-	return time.Duration(d.MaxTimeMS)
+	Otel     OtelConfig `mapstructure:"otel"`
+	DBSqlite Sqlite     `mapstructure:"sqlite"`
+	Nats     NatsConfig `mapstructure:"nats"`
+	App      AppConfig  `mapstructure:"app"`
 }
 
 // SetUpTimezone ...

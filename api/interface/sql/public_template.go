@@ -39,6 +39,7 @@ func (r *PublicTemplate) Create(ctx context.Context, template domain.PublicTempl
 		table.PublicTemplates.State,
 		table.PublicTemplates.CreatedAt,
 		table.PublicTemplates.UpdatedAt,
+		table.PublicTemplates.Slug,
 	).VALUES(
 		template.ID,
 		template.Name,
@@ -51,13 +52,14 @@ func (r *PublicTemplate) Create(ctx context.Context, template domain.PublicTempl
 		template.State,
 		template.CreatedAt,
 		template.UpdatedAt,
+		template.Slug,
 	)
 
 	_, err = stmt.ExecContext(ctx, r.db.db)
 	return err
 }
 
-func (r *PublicTemplate) List(ctx context.Context) ([]domain.PublicTemplate, error) {
+func (r *PublicTemplate) List(ctx context.Context, limit, offset int) ([]domain.PublicTemplate, error) {
 	var templates []model.PublicTemplates
 
 	stmt := sqlite.SELECT(
@@ -66,6 +68,10 @@ func (r *PublicTemplate) List(ctx context.Context) ([]domain.PublicTemplate, err
 		table.PublicTemplates,
 	).ORDER_BY(
 		table.PublicTemplates.CreatedAt.DESC(),
+	).LIMIT(
+		int64(limit),
+	).OFFSET(
+		int64(offset),
 	)
 
 	err := stmt.QueryContext(ctx, r.db.db, &templates)
@@ -89,6 +95,7 @@ func (r *PublicTemplate) List(ctx context.Context) ([]domain.PublicTemplate, err
 			Type:          t.Type,
 			Tags:          tags,
 			CoverImage:    t.CoverImage,
+			Slug:          t.Slug,
 			State:         int(t.State),
 			CreatedAt:     t.CreatedAt,
 			UpdatedAt:     t.UpdatedAt,
@@ -96,6 +103,25 @@ func (r *PublicTemplate) List(ctx context.Context) ([]domain.PublicTemplate, err
 	}
 
 	return result, nil
+}
+
+func (r *PublicTemplate) Count(ctx context.Context) (int64, error) {
+	var count struct {
+		Count int64 `alias:"count"`
+	}
+
+	stmt := sqlite.SELECT(
+		sqlite.COUNT(sqlite.STAR).AS("count"),
+	).FROM(
+		table.PublicTemplates,
+	)
+
+	err := stmt.QueryContext(ctx, r.db.db, &count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count.Count, nil
 }
 
 func (r *PublicTemplate) Update(ctx context.Context, templateID string, template domain.PublicTemplate) error {
@@ -142,4 +168,40 @@ func (r *PublicTemplate) Delete(ctx context.Context, templateID string) error {
 	}
 
 	return nil
+}
+
+func (r *PublicTemplate) Get(ctx context.Context, id string) (domain.PublicTemplate, error) {
+	var template model.PublicTemplates
+
+	stmt := sqlite.SELECT(
+		table.PublicTemplates.AllColumns,
+	).FROM(
+		table.PublicTemplates,
+	).WHERE(
+		table.PublicTemplates.ID.EQ(sqlite.String(id)),
+	).LIMIT(1)
+
+	err := stmt.QueryContext(ctx, r.db.db, &template)
+	if err != nil {
+		return domain.PublicTemplate{}, err
+	}
+
+	var tags []string
+	if err := json.Unmarshal([]byte(template.Tags), &tags); err != nil {
+		return domain.PublicTemplate{}, err
+	}
+
+	return domain.PublicTemplate{
+		ID:            template.ID,
+		Name:          template.Name,
+		Description:   template.Description,
+		PriceInterval: template.PriceInterval,
+		Price:         int(template.Price),
+		Type:          template.Type,
+		Tags:          tags,
+		CoverImage:    template.CoverImage,
+		State:         int(template.State),
+		CreatedAt:     template.CreatedAt,
+		UpdatedAt:     template.UpdatedAt,
+	}, nil
 }
