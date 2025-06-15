@@ -79,7 +79,7 @@
         icon: 'pi pi-whatsapp pi-copy',
         command: async () => {
 
-          navigator.clipboard.writeText(renderTemplate(userTemplateData.value.message_template["whatsapp"].text, guest, userTemplateData.value.url)).then(() => {
+          navigator.clipboard.writeText(renderTemplate(userTemplateData.value.message_template["whatsapp"].text, guest, `${userTemplateData.value.url}?guest_id=${guest.id}`)).then(() => {
             toast.add({ severity: 'success', summary: 'Text Copied', life: 3000 })
           }).catch(err => {
             toast.add({ severity: 'error', summary: 'Text Copied Error ' + err.Error(), life: 3000 })
