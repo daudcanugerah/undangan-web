@@ -26,9 +26,9 @@ type guestsTable struct {
 	Telp           sqlite.ColumnString
 	Address        sqlite.ColumnString
 	Message        sqlite.ColumnString
-	Attend         sqlite.ColumnBool
 	ViewAt         sqlite.ColumnTimestamp
 	CreatedAt      sqlite.ColumnTimestamp
+	Attend         sqlite.ColumnBool
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
@@ -79,12 +79,12 @@ func newGuestsTableImpl(schemaName, tableName, alias string) guestsTable {
 		TelpColumn           = sqlite.StringColumn("telp")
 		AddressColumn        = sqlite.StringColumn("address")
 		MessageColumn        = sqlite.StringColumn("message")
-		AttendColumn         = sqlite.BoolColumn("attend")
 		ViewAtColumn         = sqlite.TimestampColumn("view_at")
 		CreatedAtColumn      = sqlite.TimestampColumn("created_at")
-		allColumns           = sqlite.ColumnList{IDColumn, UserTemplateIDColumn, NameColumn, GroupNameColumn, PersonColumn, TagsColumn, TelpColumn, AddressColumn, MessageColumn, AttendColumn, ViewAtColumn, CreatedAtColumn}
-		mutableColumns       = sqlite.ColumnList{UserTemplateIDColumn, NameColumn, GroupNameColumn, PersonColumn, TagsColumn, TelpColumn, AddressColumn, MessageColumn, AttendColumn, ViewAtColumn, CreatedAtColumn}
-		defaultColumns       = sqlite.ColumnList{NameColumn, GroupNameColumn, PersonColumn, TagsColumn, TelpColumn, AddressColumn, MessageColumn, AttendColumn, CreatedAtColumn}
+		AttendColumn         = sqlite.BoolColumn("attend")
+		allColumns           = sqlite.ColumnList{IDColumn, UserTemplateIDColumn, NameColumn, GroupNameColumn, PersonColumn, TagsColumn, TelpColumn, AddressColumn, MessageColumn, ViewAtColumn, CreatedAtColumn, AttendColumn}
+		mutableColumns       = sqlite.ColumnList{UserTemplateIDColumn, NameColumn, GroupNameColumn, PersonColumn, TagsColumn, TelpColumn, AddressColumn, MessageColumn, ViewAtColumn, CreatedAtColumn, AttendColumn}
+		defaultColumns       = sqlite.ColumnList{NameColumn, GroupNameColumn, PersonColumn, TagsColumn, TelpColumn, AddressColumn, MessageColumn, CreatedAtColumn, AttendColumn}
 	)
 
 	return guestsTable{
@@ -100,9 +100,9 @@ func newGuestsTableImpl(schemaName, tableName, alias string) guestsTable {
 		Telp:           TelpColumn,
 		Address:        AddressColumn,
 		Message:        MessageColumn,
-		Attend:         AttendColumn,
 		ViewAt:         ViewAtColumn,
 		CreatedAt:      CreatedAtColumn,
+		Attend:         AttendColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

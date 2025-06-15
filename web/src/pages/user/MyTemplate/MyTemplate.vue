@@ -10,7 +10,7 @@
 
   const list = computed(() => {
     if (isLoading.value) return [];
-    return userTemplateStore.getList;
+    return userTemplateStore.getList();
   });
 
   const selectedUserManagers = ref([]);
@@ -29,7 +29,7 @@
   const isLoading = ref(true);
 
   onMounted(async () => {
-    userTemplateStore.fetch()
+    await userTemplateStore.fetchTemplates()
     isLoading.value = false;
   });
 
@@ -38,7 +38,7 @@
 
   <template>
     <div class="card overflow-scroll w-full p-10">
-      <DataTable ref="dt" v-model:selection="selectedUserManagers" :value="list" dataKey="id" :paginator="true"
+      <DataTable ref="dt" v-model:selection="selectedUserManagers" :value="list.data" dataKey="id" :paginator="true"
         size="small" :rows="10" :filters="filters"
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         :rowsPerPageOptions="[5, 10, 25]"

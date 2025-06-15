@@ -1,185 +1,146 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-
-const guestManagerList = [
-  {
-    id: 1001,
-    template_id: 1,
-    name: 'Alice Smith',
-    group: 'Family of Groom',
-    person: 1,
-    tags: ['vegan', '+1'],
-    telp: '+628111500998',
-    address: 'Jakarta Selatan',
-    message: 'Congrats!',
-    attend: true,
-    view_at: new Date('2025-06-01T10:00:00Z'),
-    created_at: new Date('2025-06-01T10:00:00Z'),
-    updated_at: new Date('2025-06-01T10:10:00Z'),
-  },
-  {
-    id: 1002,
-    template_id: 1,
-    name: 'Budi Hartono',
-    group: 'Friends of Groom',
-    person: 1,
-    tags: ['no alcohol'],
-    telp: '+6282234567891',
-    address: 'Bandung',
-    message: '',
-    attend: false,
-    view_at: null,
-    created_at: new Date('2025-06-01T11:00:00Z'),
-    updated_at: new Date('2025-06-01T11:05:00Z'),
-  },
-  {
-    id: 1003,
-    template_id: 1,
-    name: 'Citra Dewi',
-    person: 1,
-    group: 'Friends of Bride',
-    tags: ['vegetarian', '+1'],
-    telp: '+6283234567892',
-    address: 'Surabaya',
-    message: 'Can’t wait!',
-    attend: true,
-    view_at: new Date('2025-06-02T09:15:00Z'),
-    created_at: new Date('2025-06-02T09:15:00Z'),
-    updated_at: new Date('2025-06-02T09:20:00Z'),
-  },
-  {
-    id: 1004,
-    template_id: 1,
-    name: 'Dewi Lestari',
-    person: 1,
-    group: 'VIP',
-    tags: [],
-    telp: '+6284234567893',
-    address: '',
-    message: '',
-    attend: false,
-    view_at: null,
-    created_at: new Date('2025-06-03T08:00:00Z'),
-    updated_at: new Date('2025-06-03T08:01:00Z'),
-  },
-  {
-    id: 1005,
-    template_id: 1,
-    name: 'Erik Prasetyo',
-    person: 1,
-    group: 'Colleagues',
-    tags: ['confirmed by phone'],
-    telp: '+6285234567894',
-    address: 'Depok',
-    message: 'Thanks for the invite!',
-    attend: true,
-    view_at: new Date('2025-06-01T13:00:00Z'),
-    created_at: new Date('2025-06-01T13:00:00Z'),
-    updated_at: new Date('2025-06-01T13:15:00Z'),
-  },
-  {
-    id: 1006,
-    template_id: 1,
-    name: 'Fatimah Zahra',
-    person: 1,
-    group: 'Family of Bride',
-    tags: ['halal'],
-    telp: '+6286234567895',
-    address: 'Yogyakarta',
-    message: '',
-    attend: true,
-    view_at: new Date('2025-06-04T10:30:00Z'),
-    created_at: new Date('2025-06-04T10:30:00Z'),
-    updated_at: new Date('2025-06-04T10:35:00Z'),
-  },
-  {
-    id: 1007,
-    template_id: 1,
-    name: 'Gilang Ramadhan',
-    group: 'School Friends',
-    tags: ['+1', 'no kids'],
-    person: 1,
-    telp: '+6287234567896',
-    address: 'Bogor',
-    message: '',
-    attend: false,
-    view_at: null,
-    created_at: new Date('2025-06-01T14:20:00Z'),
-    updated_at: new Date('2025-06-01T14:20:00Z'),
-  },
-  {
-    id: 1008,
-    template_id: 1,
-    name: 'Hana Putri',
-    group: 'College Friends',
-    tags: ['vegetarian'],
-    telp: '+6288234567897',
-    person: 10,
-    address: 'Semarang',
-    message: 'See you there!',
-    attend: true,
-    view_at: new Date('2025-06-03T16:00:00Z'),
-    created_at: new Date('2025-06-03T16:00:00Z'),
-    updated_at: new Date('2025-06-03T16:10:00Z'),
-  },
-  {
-    id: 1009,
-    template_id: 1,
-    name: 'Indra Kusuma',
-    group: 'Neighbors',
-    tags: [],
-    telp: '+6289234567898',
-    address: '',
-    person: 1,
-    message: '',
-    attend: false,
-    view_at: null,
-    created_at: new Date('2025-06-01T15:00:00Z'),
-    updated_at: new Date('2025-06-01T15:05:00Z'),
-  },
-  {
-    id: 1010,
-    template_id: 1,
-    name: 'Joko Santoso',
-    group: 'Others',
-    tags: ['sent gift'],
-    telp: '+6280234567899',
-    address: 'Bali',
-    message: 'Sending love and blessings.',
-    person: 1,
-    attend: false,
-    view_at: null,
-    created_at: new Date('2025-06-01T16:30:00Z'),
-    updated_at: new Date('2025-06-01T16:35:00Z'),
-  },
-]
+import { useAuthUser } from './authStore'
 
 export const useGuestManagerStore = defineStore('guestManager', {
   state: () => ({
-    list: [],
+    list: reactive({ data: [], total: 0 }),
   }),
+
   getters: {
-    getGuestByTemplateID(state) {
-      return (id) => {
-        return (state.list.filter(e => e.template_id == id) || [])
-      }
+    getGuestByTemplateID: (state) => (templateId) => {
+      return state.list.filter(guest => guest.user_template_id === templateId)
+    },
+    getList: (state) => () => {
+      return state.list
     },
   },
+
   actions: {
-    fetch() {
-      this.list = guestManagerList.map(e => e)
-    },
-    delete(id = "") {
-      this.list = this.list.filter(user => user.id !== id);
-    },
-    create(data = {}) {
-      this.list.push(data);
-    },
-    update(id, data = {}) {
-      const index = this.list.findIndex(user => user.id === id);
-      if (index !== -1) {
-        this.list[index] = { ...this.list[index], ...data };
+    async fetchGuests(userTemplateId, page = 1, limit = 100) {
+      const authStore = useAuthUser()
+      try {
+        const response = await fetch(
+          `http://localhost:8085/private/guests?page=${page}&limit=${limit}&user_template_id=${userTemplateId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${authStore.token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data = await response.json()
+        this.list.data.splice(0, this.list.length)
+        this.list.total = 0
+        this.list.data = data?.data || []
+        this.list.total = data?.total | 0
+      } catch (error) {
+        this.error = error.message
+        console.error('Error fetching guests:', error)
+        throw error
+      } finally {
+        this.loading = false
       }
     },
-  },
-});
+
+    async deleteGuest(id) {
+      try {
+        const response = await fetch(
+          `http://localhost:8085/private/guests/${id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${authStore.token}`,
+            }
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to delete guest')
+        }
+
+        this.list = this.list.filter(guest => guest.id !== id)
+      } catch (error) {
+        console.error('Error deleting guest:', error)
+        throw error
+      }
+    },
+
+    async createGuest(guestData) {
+      const authStore = useAuthUser()
+      debugger
+      try {
+        const response = await fetch(
+          'http://localhost:8085/private/guests',
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${authStore.token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              ...guestData,
+            })
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to create guest')
+        }
+
+        const newGuest = await response.json()
+        this.list.data.push({
+          ...newGuest,
+        })
+        await this.fetchGuests(guestData.user_template_id)
+        return
+      } catch (error) {
+        console.error('Error creating guest:', error)
+        throw error
+      }
+    },
+
+    async updateGuest(id, updates) {
+      try {
+        const response = await fetch(
+          `http://localhost:8085/private/guests/${id}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              ...updates,
+              tags: JSON.stringify(updates.tags || [])
+            })
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to update guest')
+        }
+
+        const updatedGuest = await response.json()
+        const index = this.list.findIndex(g => g.id === id)
+        if (index !== -1) {
+          this.list[index] = {
+            ...this.list[index],
+            ...updatedGuest,
+            tags: updates.tags || this.list[index].tags
+          }
+        }
+        return updatedGuest
+      } catch (error) {
+        console.error('Error updating guest:', error)
+        throw error
+      }
+    }
+  }
+})

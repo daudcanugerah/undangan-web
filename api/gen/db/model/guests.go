@@ -21,7 +21,7 @@ type Guests struct {
 	Telp           string
 	Address        string
 	Message        string
-	Attend         bool
 	ViewAt         *time.Time
 	CreatedAt      time.Time
+	Attend         *bool
 }

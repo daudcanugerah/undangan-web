@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"net/http"
-
 	"basic-service/domain"
 	"basic-service/interface/rest/model"
 	"basic-service/usecase"
+	"net/http"
 
 	"github.com/ggicci/httpin"
 	"github.com/go-chi/render"
@@ -28,7 +27,7 @@ func NewGuest(cs *usecase.GuestUsecase) *Guest {
 func (h *Guest) UpdateLastView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// Retrieve your data in one line of code!
-	input := r.Context().Value(httpin.Input).(*model.GuestUpdateMessageRequest)
+	input := r.Context().Value(httpin.Input).(*model.IdentityRequest)
 
 	if err := h.validator.Struct(input); err != nil {
 		renderError(w, r, http.StatusBadRequest, "Validation failed", err)
@@ -61,20 +60,14 @@ func (h *Guest) GetGuest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Status(r, http.StatusOK)
-	render.JSON(w, r, domain.Guest{
-		ID:             guest.ID,
-		UserTemplateID: guest.UserTemplateID,
-		Name:           guest.Name,
-		Group:          guest.Group,
-		Person:         guest.Person,
-		Tags:           guest.Tags,
-		Telp:           guest.Telp,
-		Address:        guest.Address,
-		Message:        guest.Message,
-		Attend:         guest.Attend,
-		ViewAt:         guest.ViewAt,
-		CreatedAt:      guest.CreatedAt,
-		UpdatedAt:      guest.UpdatedAt,
+	render.JSON(w, r, model.SafeGuest{
+		Name:    guest.Name,
+		Group:   guest.Group,
+		Person:  guest.Person,
+		Address: guest.Address,
+		Message: guest.Message,
+		ViewAt:  guest.ViewAt,
+		Attend:  guest.Attend,
 	})
 }
 
@@ -88,7 +81,7 @@ func (h *Guest) UpdateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.cs.UpdateMessageAndLastView(ctx, input.ID, input.Message); err != nil {
+	if err := h.cs.UpdateMessageAndLastView(ctx, input.Payload.ID, input.Payload.Message, input.Payload.Attend); err != nil {
 		renderError(w, r, http.StatusBadRequest, "update Guest Message failed", err)
 		return
 	}
@@ -109,13 +102,13 @@ func (h *Guest) Create(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.cs.Create(ctx, domain.Guest{
 		ID:             uuid.New().String(),
-		UserTemplateID: input.UserTemplateId,
-		Name:           input.Name,
-		Group:          input.Group,
-		Person:         input.Person,
-		Tags:           input.Tags,
-		Telp:           input.Telp,
-		Address:        input.Address,
+		UserTemplateID: input.Payload.UserTemplateId,
+		Name:           input.Payload.Name,
+		Group:          input.Payload.Group,
+		Person:         input.Payload.Person,
+		Tags:           input.Payload.Tags,
+		Telp:           input.Payload.Telp,
+		Address:        input.Payload.Address,
 	}); err != nil {
 		renderError(w, r, http.StatusBadRequest, "Create Guest failed", err)
 		return
@@ -151,8 +144,8 @@ func (h *Guest) List(w http.ResponseWriter, r *http.Request) {
 			UserTemplateId: v.UserTemplateID,
 		}
 
-		if v.ViewAt != nil {
-			k.ViewAt = *v.ViewAt
+		if v.ViewAt != nil && !v.ViewAt.IsZero() {
+			k.ViewAt = v.ViewAt
 		}
 		result.Data = append(result.Data, k)
 	}

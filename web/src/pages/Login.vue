@@ -21,10 +21,10 @@ const isAdmin = ref(false)
 const formData = ref()
 
 const schema = v.object({
-  username: v.pipe(
+  email: v.pipe(
     v.string(),
-    v.nonEmpty('Username is required'),
-    v.minLength(3, 'Username must be at least 3 characters')
+    v.nonEmpty('email is required'),
+    v.minLength(3, 'email must be at least 3 characters')
   ),
   password: v.pipe(
     v.string(),
@@ -40,18 +40,19 @@ onMounted(() => {
 
 const resolver = valibotResolver(schema)
 
-const onFormSubmit = ({ valid, values }) => {
+const onFormSubmit = async ({ valid, values }) => {
   if (valid) {
-    let authUser = userStore.findByCredential(values.username, values.password, router.currentRoute.value.name == "admin.login" ? 1 : 2)
-    if (!authUser?.id) {
+    let isSucess = await authUserStore.login(values.email, values.password, router.currentRoute.value.name == "admin.login" ? 1 : 2)
+    if (!isSucess) {
       toast.add({ severity: 'error', summary: 'Invalid credentials.', life: 3000 });
       return;
     }
 
-    authUserStore.activeUser = authUser
-    if (authUserStore.activeUser.role == 2) {
+    const activeUser = authUserStore.getActiveUser()
+    console.log(activeUser)
+    if (activeUser.role == 2) {
       router.push({ name: 'user.myTemplate' })
-    } else if (authUserStore.activeUser.role == 1) {
+    } else if (activeUser.role == 1) {
       router.push({ name: 'admin.templateManager' })
     }
 
@@ -101,9 +102,9 @@ function submitForm() {
       </div>
       <div class="flex flex-col gap-6 w-full">
         <Form v-slot="$form" ref="formData" :resolver="resolver" @submit="onFormSubmit" class="flex flex-col gap-6">
-          <FormField v-slot="$field" name="username" class="flex flex-col gap-1">
-            <label for="username">Username</label>
-            <InputText id="username" type="text" v-model="$field.value" placeholder="username"
+          <FormField v-slot="$field" name="email" class="flex flex-col gap-1">
+            <label for="email">email</label>
+            <InputText id="email" type="email" v-model="$field.value" placeholder="email"
               :class="{ 'p-invalid': $field.invalid }" />
             <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">
               {{ $field.error?.message }}

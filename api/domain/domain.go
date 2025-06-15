@@ -54,8 +54,8 @@ type PublicTemplate struct {
 }
 
 type MessageTemplate struct {
-	Text     string
-	Provider string
+	Text     string `json:"text,omitempty"`
+	Provider string `json:"provider,omitempty"`
 }
 
 type UserTemplate struct {
@@ -83,7 +83,7 @@ type Guest struct {
 	Telp           string
 	Address        string
 	Message        string
-	Attend         bool
+	Attend         *bool
 	ViewAt         *time.Time
 	CreatedAt      time.Time
 	UpdatedAt      time.Time

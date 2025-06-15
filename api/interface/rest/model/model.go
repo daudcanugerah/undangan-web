@@ -34,12 +34,15 @@ type ErrorResponse struct {
 
 type GuestListRequest struct {
 	PaginationRequest
-	UserTemplateID string `json:"user_template_id,omitempty"`
+	UserTemplateID string `in:"query=user_template_id"`
 }
 
 type GuestUpdateMessageRequest struct {
-	ID      string `in:"body=id"`
-	Message string `in:"body=message"`
+	Payload struct {
+		ID      string `json:"id,omitempty"`
+		Attend  bool   `json:"attend,omitempty"`
+		Message string `json:"message,omitempty"`
+	} `in:"body=json" json:"payload,omitempty"` // use "body=xml" for XML formatted body
 }
 
 type IdentityRequest struct {
@@ -47,14 +50,15 @@ type IdentityRequest struct {
 }
 
 type GuestCreateRequest struct {
-	UserTemplateId string   `json:"userTemplateId,omitempty"`
-	Address        string   `json:"address,omitempty"`
-	Attend         bool     `json:"attend,omitempty"`
-	Group          string   `json:"group,omitempty"`
-	Name           string   `json:"name,omitempty"`
-	Person         int      `json:"person,omitempty"`
-	Tags           []string `json:"tags,omitempty"`
-	Telp           string   `json:"telp,omitempty"`
+	Payload struct {
+		UserTemplateId string   `json:"user_template_id,omitempty"`
+		Address        string   `json:"address,omitempty"`
+		Group          string   `json:"group,omitempty"`
+		Name           string   `json:"name,omitempty"`
+		Person         int      `json:"person,omitempty"`
+		Tags           []string `json:"tags,omitempty"`
+		Telp           string   `json:"telp,omitempty"`
+	} `in:"body=json" json:"payload,omitempty"` // use "body=xml" for XML formatted body
 }
 
 type GuestListResult struct {
@@ -62,21 +66,32 @@ type GuestListResult struct {
 	Data  []Guest `json:"data"`
 }
 
+type SafeGuest struct {
+	Attend  *bool      `json:"attend,omitempty"`
+	Group   string     `json:"group,omitempty"`
+	Id      string     `json:"id,omitempty"`
+	Message string     `json:"message,omitempty"`
+	Address string     `json:"address,omitempty"`
+	Name    string     `json:"name,omitempty"`
+	ViewAt  *time.Time `json:"view_at,omitempty"`
+	Person  int        `json:"person,omitempty"`
+}
+
 // Guest defines model for Guest.
 type Guest struct {
-	Address        string    `json:"address,omitempty"`
-	Attend         bool      `json:"attend,omitempty"`
-	CreatedAt      time.Time `json:"createdAt,omitempty"`
-	Group          string    `json:"group,omitempty"`
-	Id             string    `json:"id,omitempty"`
-	Message        string    `json:"message,omitempty"`
-	Name           string    `json:"name,omitempty"`
-	Person         int       `json:"person,omitempty"`
-	Tags           []string  `json:"tags,omitempty"`
-	Telp           string    `json:"telp,omitempty"`
-	UpdatedAt      time.Time `json:"updatedAt,omitempty"`
-	UserTemplateId string    `json:"userTemplateId,omitempty"`
-	ViewAt         time.Time `json:"viewAt,omitempty"`
+	Address        string     `json:"address,omitempty"`
+	Attend         *bool      `json:"attend,omitempty"`
+	CreatedAt      time.Time  `json:"created_at,omitempty"`
+	Group          string     `json:"group,omitempty"`
+	Id             string     `json:"id,omitempty"`
+	Message        string     `json:"message,omitempty"`
+	Name           string     `json:"name,omitempty"`
+	Person         int        `json:"person,omitempty"`
+	Tags           []string   `json:"tags,omitempty"`
+	Telp           string     `json:"telp,omitempty"`
+	UpdatedAt      time.Time  `json:"updated_at,omitempty"`
+	UserTemplateId string     `json:"user_template_id,omitempty"`
+	ViewAt         *time.Time `json:"view_at,omitempty"`
 }
 
 // LoginRequest defines model for LoginRequest.
@@ -103,18 +118,18 @@ type PublicTemplateListResult struct {
 
 // PublicTemplate defines model for PublicTemplate.
 type PublicTemplate struct {
-	CoverImage    string    `json:"coverImage,omitempty"`
-	CreatedAt     time.Time `json:"createdAt,omitempty"`
+	CoverImage    string    `json:"cover_image,omitempty"`
+	CreatedAt     time.Time `json:"created_at,omitempty"`
 	Slug          string    `json:"slug,omitempty"`
 	Description   string    `json:"description,omitempty"`
 	Id            string    `json:"id,omitempty"`
 	Name          string    `json:"name,omitempty"`
 	Price         int       `json:"price,omitempty"`
-	PriceInterval string    `json:"priceInterval,omitempty"`
+	PriceInterval string    `json:"price_interval,omitempty"`
 	State         int       `json:"state,omitempty"`
 	Tags          []string  `json:"tags,omitempty"`
 	Type          string    `json:"type,omitempty"`
-	UpdatedAt     time.Time `json:"updatedAt,omitempty"`
+	UpdatedAt     time.Time `json:"updated_at,omitempty"`
 }
 
 type PublicTemplateCreateRequest struct {
@@ -158,26 +173,26 @@ type RegisterUser struct {
 }
 
 type Safeuser struct {
-	CreatedAt time.Time `json:"createdAt,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	Email     string    `json:"email,omitempty"`
 	Id        string    `json:"id,omitempty"`
-	IsActive  bool      `json:"isActive,omitempty"`
+	IsActive  bool      `json:"is_active,omitempty"`
 	Name      string    `json:"name,omitempty"`
 	Role      UserRole  `json:"role,omitempty"`
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 
 // User defines model for User.
 type User struct {
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 	Email     *string    `json:"email,omitempty"`
 	Password  string     `json:"Password"`
 	Id        *string    `json:"id,omitempty"`
-	IsActive  *bool      `json:"isActive,omitempty"`
+	IsActive  *bool      `json:"is_active,omitempty"`
 	Name      *string    `json:"name,omitempty"`
 	Profile   *string    `json:"profile,omitempty"`
 	Role      *UserRole  `json:"role,omitempty"`
-	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
 // UserRole defines model for User.Role.
@@ -189,18 +204,18 @@ type UserTemplateListResult struct {
 	Data  []UserTemplate `json:"data"`
 }
 type UserTemplate struct {
-	BaseTemplateId  string                     `json:"baseTemplateId,omitempty"`
-	CoverImage      string                     `json:"coverImage,omitempty"`
-	CreatedAt       time.Time                  `json:"createdAt,omitempty"`
-	ExpireAt        time.Time                  `json:"expireAt,omitempty"`
+	BaseTemplateId  string                     `json:"base_template_id,omitempty"`
+	CoverImage      string                     `json:"cover_image,omitempty"`
+	CreatedAt       time.Time                  `json:"created_at,omitempty"`
+	ExpireAt        time.Time                  `json:"expire_at,omitempty"`
 	Id              string                     `json:"id,omitempty"`
-	MessageTemplate map[string]MessageTemplate `json:"messageTemplate,omitempty"`
+	MessageTemplate map[string]MessageTemplate `json:"message_template,omitempty"`
 	Name            string                     `json:"name,omitempty"`
 	Slug            string                     `json:"slug,omitempty"`
 	State           int                        `json:"state,omitempty"`
-	UpdatedAt       time.Time                  `json:"updatedAt,omitempty"`
+	UpdatedAt       time.Time                  `json:"updated_at,omitempty"`
 	Url             string                     `json:"url,omitempty"`
-	UserId          string                     `json:"userId,omitempty"`
+	UserId          string                     `json:"user_id,omitempty"`
 }
 
 // PatchPublicGuestsIdJSONBody defines parameters for PatchPublicGuestsId.
@@ -210,6 +225,6 @@ type PatchPublicGuestsIdJSONBody struct {
 
 // PatchUsersJSONBody defines parameters for PatchUsers.
 type PatchUsersJSONBody struct {
-	IsActive *bool   `json:"isActive,omitempty"`
+	IsActive *bool   `json:"is_active,omitempty"`
 	UserId   *string `json:"userId,omitempty"`
 }

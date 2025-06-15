@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"path"
 
 	"basic-service/domain"
 	"basic-service/interface/rest/model"
@@ -67,7 +68,7 @@ func (h *UserTemplate) Create(w http.ResponseWriter, r *http.Request) {
 	if err := h.cs.Create(ctx, domain.UserTemplate{
 		ID:              uuid.New().String(),
 		Name:            input.Name,
-		CoverImage:      coverURL,
+		CoverImage:      path.Join("uploads", coverURL),
 		State:           1,
 		Slug:            input.Slug,
 		BaseTemplateID:  input.BaseTemplateId,

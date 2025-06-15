@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"path"
 
 	"basic-service/domain"
 	"basic-service/interface/rest/model"
@@ -60,7 +61,7 @@ func (h *PublicTemplate) Create(w http.ResponseWriter, r *http.Request) {
 		Price:         input.Price,
 		Type:          input.Type,
 		Tags:          input.Tags,
-		CoverImage:    coverURL,
+		CoverImage:    path.Join("uploads", coverURL),
 		State:         input.State,
 		Slug:          templateSlug,
 	}); err != nil {

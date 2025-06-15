@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"basic-service/domain"
@@ -61,18 +62,21 @@ func (r *GuestManager) Create(ctx context.Context, guest domain.Guest) error {
 	return errtrace.Wrap(err)
 }
 
-func (r *GuestManager) List(ctx context.Context, userTemplateID string, page, pageSize int) ([]domain.Guest, int64, error) {
+func (r *GuestManager) List(ctx context.Context, userID, userTemplateID string, page, pageSize int) ([]domain.Guest, int64, error) {
 	var guests []model.Guests
 
 	// Calculate offset based on page and pageSize
 	offset := (page - 1) * pageSize
 
+	// Modified query with JOIN and user_id check
 	stmt := sqlite.SELECT(
 		table.Guests.AllColumns,
 	).FROM(
-		table.Guests,
+		table.Guests.INNER_JOIN(table.UserTemplates,
+			table.UserTemplates.ID.EQ(table.Guests.UserTemplateID)),
 	).WHERE(
-		table.Guests.UserTemplateID.EQ(sqlite.String(userTemplateID)),
+		table.Guests.UserTemplateID.EQ(sqlite.String(userTemplateID)).
+			AND(table.UserTemplates.UserID.EQ(sqlite.String(userID))),
 	).ORDER_BY(
 		table.Guests.CreatedAt.DESC(),
 	).LIMIT(
@@ -80,6 +84,8 @@ func (r *GuestManager) List(ctx context.Context, userTemplateID string, page, pa
 	).OFFSET(
 		int64(offset),
 	)
+
+	fmt.Println("SQL Query:", stmt.DebugSql())
 
 	err := stmt.QueryContext(ctx, r.db.db, &guests)
 	if err != nil {
@@ -89,8 +95,8 @@ func (r *GuestManager) List(ctx context.Context, userTemplateID string, page, pa
 		return nil, 0, errtrace.Wrap(err)
 	}
 
-	// Get total count
-	total, err := r.Count(ctx, userTemplateID)
+	// Get total count with the same user_id filter
+	total, err := r.getFilteredCount(ctx, userID, userTemplateID)
 	if err != nil {
 		return nil, 0, errtrace.Wrap(err)
 	}
@@ -121,25 +127,32 @@ func (r *GuestManager) List(ctx context.Context, userTemplateID string, page, pa
 	return result, total, nil
 }
 
-func (r *GuestManager) Count(ctx context.Context, userTemplateID string) (int64, error) {
-	var count struct {
-		Count int64 `alias:"count"`
-	}
+// New helper function for filtered count
+func (r *GuestManager) getFilteredCount(ctx context.Context, userID, userTemplateID string) (int64, error) {
+	var count int64
 
 	stmt := sqlite.SELECT(
-		sqlite.COUNT(table.Guests.ID).AS("count"),
+		sqlite.COUNT(sqlite.STAR).AS("total"),
 	).FROM(
-		table.Guests,
+		table.Guests.
+			INNER_JOIN(table.UserTemplates,
+				table.UserTemplates.ID.EQ(table.Guests.UserTemplateID)),
 	).WHERE(
-		table.Guests.UserTemplateID.EQ(sqlite.String(userTemplateID)),
+		table.Guests.UserTemplateID.EQ(sqlite.String(userTemplateID)).
+			AND(table.UserTemplates.UserID.EQ(sqlite.String(userID))),
 	)
 
-	err := stmt.QueryContext(ctx, r.db.db, &count)
+	var total struct {
+		Total int64
+	}
+
+	err := stmt.QueryContext(ctx, r.db.db, &total)
 	if err != nil {
 		return 0, errtrace.Wrap(err)
 	}
+	count = total.Total
 
-	return count.Count, nil
+	return count, nil
 }
 
 func (r *GuestManager) Get(ctx context.Context, guestID string) (*domain.Guest, error) {
@@ -182,53 +195,36 @@ func (r *GuestManager) Get(ctx context.Context, guestID string) (*domain.Guest, 
 	}, nil
 }
 
-func (r *GuestManager) UpdateMessage(ctx context.Context, id, message string) error {
-	stmt := table.Guests.UPDATE().
-		SET(
-			table.Guests.Message.SET(sqlite.String(message)),
-			table.Guests.ViewAt.SET(sqlite.DATETIME(time.Now())),
-		).WHERE(
-		table.Guests.ID.EQ(sqlite.String(id)),
-	)
-
-	result, err := stmt.ExecContext(ctx, r.db.db)
-	if err != nil {
-		return errtrace.Wrap(err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return errtrace.Wrap(err)
-	}
-
-	if rowsAffected == 0 {
-		return errtrace.Wrap(errors.New("no guest found with the given ID"))
-	}
-
-	return nil
-}
-
 func (r *GuestManager) Update(ctx context.Context, guestID string, guest domain.Guest) error {
 	tagsJSON, err := json.Marshal(guest.Tags)
 	if err != nil {
 		return errtrace.Wrap(err)
 	}
 
+	setList := []interface{}{
+		table.Guests.Name.SET(sqlite.String(guest.Name)),
+		table.Guests.GroupName.SET(sqlite.String(guest.Group)),
+		table.Guests.Person.SET(sqlite.Int(int64(guest.Person))),
+		table.Guests.Tags.SET(sqlite.String(string(tagsJSON))),
+		table.Guests.Telp.SET(sqlite.String(guest.Telp)),
+		table.Guests.Address.SET(sqlite.String(guest.Address)),
+		table.Guests.Message.SET(sqlite.String(guest.Message)),
+		table.Guests.ViewAt.SET(sqlite.DATETIME(guest.ViewAt)),
+		table.Guests.CreatedAt.SET(sqlite.DATETIME(guest.CreatedAt)),
+	}
+
+	if guest.Attend != nil {
+		setList = append(setList, table.Guests.Attend.SET(sqlite.Bool(*guest.Attend)))
+	}
+
 	stmt := table.Guests.UPDATE().
-		SET(
-			table.Guests.Name.SET(sqlite.String(guest.Name)),
-			table.Guests.GroupName.SET(sqlite.String(guest.Group)),
-			table.Guests.Person.SET(sqlite.Int(int64(guest.Person))),
-			table.Guests.Tags.SET(sqlite.String(string(tagsJSON))),
-			table.Guests.Telp.SET(sqlite.String(guest.Telp)),
-			table.Guests.Address.SET(sqlite.String(guest.Address)),
-			table.Guests.Message.SET(sqlite.String(guest.Message)),
-			table.Guests.Attend.SET(sqlite.Bool(guest.Attend)),
-			table.Guests.ViewAt.SET(sqlite.DATETIME(guest.ViewAt)),
-			table.Guests.CreatedAt.SET(sqlite.DATETIME(guest.CreatedAt)),
-		).WHERE(
+		SET(setList[0], setList[1:]...).WHERE(
 		table.Guests.ID.EQ(sqlite.String(guestID)),
 	)
+
+	if guest.Attend != nil {
+		stmt = stmt.SET(table.Guests.Attend.SET(sqlite.Bool(*guest.Attend)))
+	}
 
 	result, err := stmt.ExecContext(ctx, r.db.db)
 	if err != nil {
@@ -247,27 +243,41 @@ func (r *GuestManager) Update(ctx context.Context, guestID string, guest domain.
 	return nil
 }
 
-func (r *GuestManager) UpdateMessageAndLastView(ctx context.Context, guestID, message string) error {
-	stmt := table.Guests.UPDATE().
-		SET(
-			table.Guests.Message.SET(sqlite.String(message)),
-			table.Guests.ViewAt.SET(sqlite.DATETIME(time.Now())),
-		).WHERE(
-		table.Guests.ID.EQ(sqlite.String(guestID)),
-	)
-
-	result, err := stmt.ExecContext(ctx, r.db.db)
-	if err != nil {
-		return errtrace.Wrap(err)
+func (r *GuestManager) UpdateMessageAndLastView(ctx context.Context, guestID, message string, attend *bool) error {
+	// Validate inputs
+	if guestID == "" {
+		return errtrace.Wrap(errors.New("guestID cannot be empty"))
+	}
+	setList := []interface{}{
+		table.Guests.Message.SET(sqlite.String(message)),
+		table.Guests.ViewAt.SET(sqlite.DATETIME(time.Now())),
 	}
 
+	if attend != nil {
+		setList = append(setList, table.Guests.Attend.SET(sqlite.Bool(*attend)))
+	}
+
+	// Prepare base update statement
+	stmt := table.Guests.UPDATE().
+		SET(setList[0], setList[1:]...).
+		WHERE(table.Guests.ID.EQ(sqlite.String(guestID)))
+
+	fmt.Println("SQL Update Query:", stmt.DebugSql())
+
+	// Execute the statement
+	result, err := stmt.ExecContext(ctx, r.db.db)
+	if err != nil {
+		return errtrace.Wrap(fmt.Errorf("failed to execute update: %w", err))
+	}
+
+	// Check if any rows were affected
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return errtrace.Wrap(err)
+		return errtrace.Wrap(fmt.Errorf("failed to get rows affected: %w", err))
 	}
 
 	if rowsAffected == 0 {
-		return errtrace.Wrap(errors.New("no guest found with the given ID"))
+		return errtrace.Wrap(fmt.Errorf("no guest found with ID: %s", guestID))
 	}
 
 	return nil

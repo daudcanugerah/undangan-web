@@ -48,7 +48,7 @@ func (r *UserTemplateRepository) Count(ctx context.Context) (int64, error) {
 }
 
 // List returns a paginated list of user templates
-func (r *UserTemplateRepository) List(ctx context.Context, offset, limit int) (UserTemplateList, error) {
+func (r *UserTemplateRepository) List(ctx context.Context, userID string, offset, limit int) (UserTemplateList, error) {
 	// Get total count
 	total, err := r.Count(ctx)
 	if err != nil {
@@ -69,6 +69,8 @@ func (r *UserTemplateRepository) List(ctx context.Context, offset, limit int) (U
 		table.UserTemplates.CreatedAt,
 		table.UserTemplates.UpdatedAt,
 		table.UserTemplates.ExpireAt,
+	).WHERE(
+		table.UserTemplates.UserID.EQ(sqlite.String(userID)),
 	).ORDER_BY(
 		table.UserTemplates.CreatedAt.DESC(),
 	).OFFSET(

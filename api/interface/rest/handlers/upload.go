@@ -155,6 +155,6 @@ func (h *UploadHandler) UploadImage(input *httpin.File) (string, error) {
 	}
 
 	// 7. Return public URL
-	publicURL := "/public/" + newFilename
+	publicURL := newFilename
 	return publicURL, nil
 }

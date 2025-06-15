@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -55,7 +56,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Email:     input.Email,
 		Password:  input.Password,
 		Name:      input.Name,
-		Profile:   imageURL,
+		Profile:   path.Join("uploads", imageURL),
 		Role:      domain.RoleUser,
 		IsActive:  true,
 		CreatedAt: time.Now(),

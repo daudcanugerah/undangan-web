@@ -26,6 +26,10 @@ type UserTemplateList struct {
 
 func (p *UserTemplate) List(ctx context.Context, page, limit int) (UserTemplateList, error) {
 	var result UserTemplateList
+	claims, err := GetClaimFromContext(ctx)
+	if err != nil {
+		return result, errtrace.Wrap(errors.New("invalid token claims"))
+	}
 
 	offset := (page - 1) * limit
 	// Get total count of templates
@@ -36,7 +40,7 @@ func (p *UserTemplate) List(ctx context.Context, page, limit int) (UserTemplateL
 	result.Total = int64(total)
 
 	// Get paginated templates
-	templates, err := p.repo.List(ctx, offset, limit)
+	templates, err := p.repo.List(ctx, claims.UserID, offset, limit)
 	if err != nil {
 		return result, errtrace.Wrap(err)
 	}

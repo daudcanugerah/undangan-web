@@ -8,11 +8,11 @@ let isLoading = ref(true)
 const templateManagerStore = useTemplateManagerStore()
 const data = computed(() => {
   if (isLoading.value) return []
-  return templateManagerStore.getList
+  return templateManagerStore.getList()
 })
 
-onMounted(() => {
-  templateManagerStore.fetch()
+onMounted(async () => {
+  await templateManagerStore.fetchTemplates()
   isLoading.value = false
 })
 

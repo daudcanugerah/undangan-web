@@ -6,6 +6,7 @@
   import { useGuestManagerStore } from '@/stores/guestManagerStore.js';
   import { useUserTemplateManagerStore } from '@/stores/userTemplateManager.js';
   import { useRoute } from 'vue-router'
+  import AddGuestManager from './AddGuestManager.vue';
 
 
   const route = useRoute()
@@ -13,45 +14,37 @@
   const userTemplateStore = useUserTemplateManagerStore()
   const toast = useToast();
   const dt = ref()
+  const userTemplateData = ref({})
 
   const selectedUserManagers = ref([])
   const filters = ref({
     global: { value: null, matchMode: 'contains' }
   });
 
-  const userTemplateData = reactive({
-    data: {}
-  })
 
-  const gustManagerList = reactive({
-    data: []
-  })
+  const gustManagerList = computed(() => {
+    if (isLoading.value) return [];
+    return guestManagerStore.getList();
+  });
 
-
+  const isAddModalVisible = ref(false);
   let isLoading = ref(true)
-  onMounted(() => {
-    guestManagerStore.fetch()
-    userTemplateStore.fetch()
+  const userTemplateID = ref("")
+
+  onMounted(async () => {
     isLoading.value = false
-    console.log("Mounted Guest Manager", gustManagerList.data)
     const templateID = route.params.id;
-    if (templateID) {
-      userTemplateData.data = userTemplateStore.getTemplate(templateID);
-      console.log(userTemplateData.data, templateID, guestManagerStore)
-      gustManagerList.data = guestManagerStore.getGuestByTemplateID(templateID);
+
+    if (!templateID) {
+      return
     }
+
+    await guestManagerStore.fetchGuests(templateID)
+    await userTemplateStore.fetchTemplates()
+
+    userTemplateData.value = userTemplateStore.getTemplate(templateID);
+    userTemplateID.value = templateID
   })
-
-  // onUnmounted(async () => {
-  //   isLoading.value = true
-  // })
-
-
-  // onMounted(() => {
-  //   gustManagerList.data = guestManagerStore.getByTemplateId(templateID)
-  //   Object.assign(userTemplateData, userTemplateStore.getTemplate(templateID))
-  //   console.log(userTemplateData)
-  // })
 
 
   const renderTemplate = (text, guest, url) => {
@@ -66,7 +59,8 @@
         label: 'Open Website',
         icon: 'pi pi-globe',
         command: () => {
-          window.open(userTemplateData.data.url, '_blank', 'noopener,noreferrer')
+          console.log(`${userTemplateData.value.url}?=guset_id=${guest.id}`)
+          window.open(`${userTemplateData.value.url}?=guset_id=${guest.id}`, '_blank', 'noopener,noreferrer')
         }
       },
       {
@@ -76,7 +70,7 @@
         label: 'Send Via Whatsapp',
         icon: 'pi pi-whatsapp',
         command: () => {
-          const text = renderTemplate(userTemplateData.data.message_template["whatsapp"].text, guest, userTemplateData.data.url)
+          const text = renderTemplate(userTemplateData.value.message_template["whatsapp"].text, guest, userTemplateData.value.url)
           const targetURL = `https://api.whatsapp.com/send?phone=${guest.telp}&text=${encodeURIComponent(text)}`
           window.open(targetURL, '_blank', 'noopener,noreferrer')
         }
@@ -86,7 +80,7 @@
         icon: 'pi pi-whatsapp pi-copy',
         command: async () => {
 
-          navigator.clipboard.writeText(renderTemplate(userTemplateData.data.message_template["whatsapp"].text, guest, userTemplateData.data.url)).then(() => {
+          navigator.clipboard.writeText(renderTemplate(userTemplateData.value.message_template["whatsapp"].text, guest, userTemplateData.value.url)).then(() => {
             toast.add({ severity: 'success', summary: 'Text Copied', life: 3000 })
           }).catch(err => {
             toast.add({ severity: 'error', summary: 'Text Copied Error ' + err.Error(), life: 3000 })
@@ -100,11 +94,12 @@
 </script>
   <template>
     <Toast />
+    <AddGuestManager v-model:visible="isAddModalVisible" v-model:userTemplateID="userTemplateID" />
     <div class="card overflow-scroll w-full p-10">
       <Toolbar class="mb-6 mt-6">
         <template #start>
           <Button label="Add Guest" icon="pi pi-plus" severity="secondary" class="mr-2" size="small"
-            @click="updateTemplate" />
+            @click="isAddModalVisible = true" />
         </template>
 
         <template #end>
@@ -128,6 +123,8 @@
           </div>
         </template>
         <Column field="name" header="Name" sortable style="min-width: 10rem"></Column>
+        <Column field="address" header="Address" sortable style="min-width: 12rem"></Column>
+        <Column field="telp" header="Telp" sortable style="min-width: 15rem" />
         <Column field="group" header="Group" sortable style="min-width: 5rem" />
         <Column field="tags" header="Tags" sortable style="min-width: 5rem">
           <template #body="slotProps">
@@ -136,7 +133,7 @@
         </Column>
         <Column field="view_at" header="Last View" sortable>
           <template #body="slotProps">
-            {{ time(slotProps.data.created_at).format("YYYY-MM-DD HH:mm") }}
+            {{ slotProps.data.view_at ? time(slotProps.data.view_at).format("YYYY-MM-DD HH:mm") : "none" }}
           </template>
         </Column>
         <Column field="created_at" header="Created" sortable>
