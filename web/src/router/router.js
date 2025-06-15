@@ -10,8 +10,8 @@ import Layout from "@/components/Layout.vue"
 
 
 const adminRoutes = [
+  { path: '/', redirect: { name: 'user.login' } },
   { path: '/admin/login', component: Login, name: "admin.login" },
-  { path: '/user/login', component: Login, name: "user.login" },
   { path: '/user/login', component: Login, name: "user.login" },
   {
     component: Layout, path: '/user', children: [

@@ -59,8 +59,7 @@
         label: 'Open Website',
         icon: 'pi pi-globe',
         command: () => {
-          console.log(`${userTemplateData.value.url}?=guset_id=${guest.id}`)
-          window.open(`${userTemplateData.value.url}?=guset_id=${guest.id}`, '_blank', 'noopener,noreferrer')
+          window.open(`${userTemplateData.value.url}?guest_id=${guest.id}`, '_blank', 'noopener,noreferrer')
         }
       },
       {
@@ -70,7 +69,7 @@
         label: 'Send Via Whatsapp',
         icon: 'pi pi-whatsapp',
         command: () => {
-          const text = renderTemplate(userTemplateData.value.message_template["whatsapp"].text, guest, userTemplateData.value.url)
+          const text = renderTemplate(userTemplateData.value.message_template["whatsapp"].text, guest, `${userTemplateData.value.url}?guest_id=${guest.id}`)
           const targetURL = `https://api.whatsapp.com/send?phone=${guest.telp}&text=${encodeURIComponent(text)}`
           window.open(targetURL, '_blank', 'noopener,noreferrer')
         }

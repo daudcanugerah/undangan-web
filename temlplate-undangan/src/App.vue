@@ -1,15 +1,13 @@
-<template>
-  <div>
+  <template>
     <section id="hero"
       class="hero w-100 h-100 p-3 mx-auto text-center d-flex justify-content-center align-items-center text-white">
       <main>
-        <h4>Kepada <span>Bapak/Ibu/Saudara/i, </span></h4>
+        <h4>Kepada <span>Bapak/Ibu/Saudara/i, {{ guestData.name }} </span></h4>
         <h1>Cat & Cut</h1>
         <p>Akan melangsungkan resepsi pernikahan dalam:</p>
         <div class="simply-countdown"></div>
         <a href="#home" class="btn btn-lg mt-4" @click="enableScroll">Lihat Undangan</a>
       </main>
-
     </section>
 
     <nav class="navbar navbar-expand-md bg-transparent sticky-top mynavbar">
@@ -42,7 +40,8 @@
           <div class="col-md-8 text-center">
             <h2>Acara Pernikahan</h2>
             <h3>Diselenggarakan pada 20 November 2024 di Jakarta, Jawa Barat.</h3>
-            <p>Oleh karena itu, d engan segala hormat, kami bermaksud untuk mengundang Bapak/Ibu, Saudara/i, untuk hadir
+            <p>Oleh karena itu, d engan segala hormat, kami bermaksud untuk mengundang Bapak/Ibu, Saudara/i, <b> {{
+              guestData.name }} </b> untuk hadir
               pada acara pernikahan kami. </p>
           </div>
         </div>
@@ -276,9 +275,8 @@
         <i class="bi bi-disc"></i>
       </div>
     </div>
-  </div>
 
-</template>
+  </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'

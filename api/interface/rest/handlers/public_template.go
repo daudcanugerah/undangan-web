@@ -63,7 +63,6 @@ func (h *PublicTemplate) Create(w http.ResponseWriter, r *http.Request) {
 		Tags:          input.Tags,
 		CoverImage:    path.Join("uploads", coverURL),
 		State:         input.State,
-		Slug:          templateSlug,
 	}); err != nil {
 		renderError(w, r, http.StatusBadRequest, "Create Public Template failed", err)
 		return

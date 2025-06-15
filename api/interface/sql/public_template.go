@@ -39,7 +39,6 @@ func (r *PublicTemplate) Create(ctx context.Context, template domain.PublicTempl
 		table.PublicTemplates.State,
 		table.PublicTemplates.CreatedAt,
 		table.PublicTemplates.UpdatedAt,
-		table.PublicTemplates.Slug,
 	).VALUES(
 		template.ID,
 		template.Name,
@@ -52,7 +51,6 @@ func (r *PublicTemplate) Create(ctx context.Context, template domain.PublicTempl
 		template.State,
 		template.CreatedAt,
 		template.UpdatedAt,
-		template.Slug,
 	)
 
 	_, err = stmt.ExecContext(ctx, r.db.db)
@@ -95,7 +93,6 @@ func (r *PublicTemplate) List(ctx context.Context, limit, offset int) ([]domain.
 			Type:          t.Type,
 			Tags:          tags,
 			CoverImage:    t.CoverImage,
-			Slug:          t.Slug,
 			State:         int(t.State),
 			CreatedAt:     t.CreatedAt,
 			UpdatedAt:     t.UpdatedAt,
