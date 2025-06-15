@@ -39,7 +39,7 @@ export const useTemplateManagerStore = defineStore('templateManager', {
         const data = await response.json()
         this.list.total = data.total
         data.data?.forEach(element => {
-          this.list.data.push(element)
+          this.list.data.push({ ...element, cover_image: "http://localhost:8085/" + element.cover_image })
         })
       } catch (error) {
         this.error = error.message

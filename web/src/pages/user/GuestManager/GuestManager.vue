@@ -48,6 +48,7 @@
 
 
   const renderTemplate = (text, guest, url) => {
+    console.log("renderTemplate", text, guest, url)
     return text.replace(/{{name}}/gi, guest.name)
       .replace(/{{address}}/gi, guest.address)
       .replace(/{{url}}/gi, url)
@@ -69,8 +70,10 @@
         label: 'Send Via Whatsapp',
         icon: 'pi pi-whatsapp',
         command: () => {
+          const phone = guest.telp.replaceAll("-", '').replaceAll(" ", "");
+          ;
           const text = renderTemplate(userTemplateData.value.message_template["whatsapp"].text, guest, `${userTemplateData.value.url}?guest_id=${guest.id}`)
-          const targetURL = `https://api.whatsapp.com/send?phone=${guest.telp}&text=${encodeURIComponent(text)}`
+          const targetURL = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`
           window.open(targetURL, '_blank', 'noopener,noreferrer')
         }
       },
