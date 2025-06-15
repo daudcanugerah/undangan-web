@@ -5,6 +5,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/ggicci/httpin"
@@ -23,6 +24,11 @@ const (
 type PaginationRequest struct {
 	Limit int `in:"query=limit"`
 	Page  int `in:"query=page"`
+}
+
+type UserTemplateListRequest struct {
+	PaginationRequest
+	UserID string `in:"query=user_id"`
 }
 
 // ErrorResponse defines model for ErrorResponse.
@@ -134,7 +140,6 @@ type PublicTemplate struct {
 
 type PublicTemplateCreateRequest struct {
 	CoverImage    *httpin.File `in:"form=cover_image"`
-	ZipFile       *httpin.File `in:"form=zip_file"`
 	Description   string       `in:"form=description"`
 	Name          string       `in:"form=name"`
 	Price         int          `in:"form=price"`
@@ -159,6 +164,8 @@ type UserTemplateCreateRequest struct {
 func (u *UserTemplateCreateRequest) GetMessageTemplate() ([]MessageTemplate, error) {
 	var result []MessageTemplate
 
+	fmt.Println(u.MessageTemplate)
+
 	if err := json.Unmarshal([]byte(u.MessageTemplate), &result); err != nil {
 		return result, err
 	}
@@ -172,7 +179,7 @@ type RegisterUser struct {
 	Profile  *httpin.File `in:"form=profile"`
 }
 
-type Safeuser struct {
+type SafeUser struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	Email     string    `json:"email,omitempty"`
 	Id        string    `json:"id,omitempty"`

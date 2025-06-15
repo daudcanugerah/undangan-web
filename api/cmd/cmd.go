@@ -27,8 +27,9 @@ var appCmd = cobra.Command{
 		publicTemplateUseCase := usecase.NewPublicTemplateUseCase(publicTemplate)
 		userTemplateCase := usecase.NewUserTemplate(userTemplate)
 		guestUsecase := usecase.NewGuestUsecase(guestManager)
+		userUsecase := usecase.NewUserUsecase(userManager)
 
-		r := rest.SetupRouter(auth, publicTemplateUseCase, userTemplateCase, guestUsecase)
+		r := rest.SetupRouter(auth, publicTemplateUseCase, userTemplateCase, guestUsecase, userUsecase)
 
 		log.Println("Server starting on :8085")
 		if err := http.ListenAndServe(":8085", r); err != nil {

@@ -3,6 +3,7 @@ import { createWebHistory, createRouter } from 'vue-router'
 import UserManagerView from '@/pages/admin/user-manager/UserManger.vue'
 import MyTemplateView from '@/pages/user/MyTemplate/MyTemplate.vue'
 import TemplateMangerView from '@/pages/admin/template-manager/TemplateManger.vue'
+import UserTemplateMangerView from '@/pages/admin/user-template/TemplateManger.vue'
 import GuestManagerView from '@/pages/user/GuestManager/GuestManager.vue'
 import BrowseTemplateView from '@/pages/user/BrowseTemplate/BrowseTemplate.vue'
 import Login from '@/pages/Login.vue'
@@ -24,7 +25,7 @@ const adminRoutes = [
     component: Layout, path: '/admin', children: [
       { path: '/admin/user-manager', component: UserManagerView, name: "admin.userManager" },
       { path: '/admin/template-manager', component: TemplateMangerView, name: "admin.templateManager" },
-      { path: '/admin/user-template-manager/:user_id', component: UserManagerView, name: "admin.userTemplateManager" },
+      { path: '/admin/user-template-manager/:id', component: UserTemplateMangerView, name: "admin.userTemplateManager" },
     ]
   }
 ]

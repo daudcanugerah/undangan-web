@@ -97,6 +97,7 @@ const items = ref([]);
 
 </script>
 <template>
+  {{ activeUser }}
   <div class="card justify-center w-55 h-screen bg-white shadow-md fixed top-0 left-0 flex">
     <Menu :model="items" class="w-full md:w-55">
       <template #start>

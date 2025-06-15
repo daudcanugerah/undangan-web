@@ -1,16 +1,15 @@
 package handlers
 
 import (
+	"basic-service/domain"
+	"basic-service/interface/rest/model"
+	"basic-service/usecase"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"path"
 	"strings"
 	"time"
-
-	"basic-service/domain"
-	"basic-service/interface/rest/model"
-	"basic-service/usecase"
 
 	"github.com/ggicci/httpin"
 	"github.com/go-chi/render"
@@ -78,7 +77,7 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Status(r, http.StatusOK)
-	render.JSON(w, r, model.Safeuser{
+	render.JSON(w, r, model.SafeUser{
 		CreatedAt: sf.CreatedAt,
 		Email:     sf.Email,
 		Id:        sf.ID,

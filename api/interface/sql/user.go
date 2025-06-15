@@ -85,7 +85,7 @@ func (r *UserRepository) ListByRole(ctx context.Context, role domain.RoleType, p
 	}
 
 	// Convert model.Users to domain.User
-	users := make([]domain.User, 0, len(dbUsers))
+	users := []domain.User{}
 	for _, dbUser := range dbUsers {
 		users = append(users, domain.User{
 			ID:        dbUser.ID,

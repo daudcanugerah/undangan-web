@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"net/http"
-	"path"
-
 	"basic-service/domain"
 	"basic-service/interface/rest/model"
 	"basic-service/usecase"
+	"net/http"
+	"path"
 
 	"github.com/ggicci/httpin"
 	"github.com/go-chi/render"
@@ -31,17 +30,7 @@ func NewPublicTemplate(cs *usecase.PublicTemplateUseCase, upload *UploadHandler)
 
 func (h *PublicTemplate) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// Retrieve your data in one line of code!
 	input := r.Context().Value(httpin.Input).(*model.PublicTemplateCreateRequest)
-	templateSlug := uuid.New().String()
-	err := h.upload.UploadTemplate(input.ZipFile, templateSlug)
-	if err != nil {
-		renderError(w, r, http.StatusBadRequest, "Template upload failed", err)
-		return
-	}
-
-	// input.Email = strings.TrimSpace(input.Email)
-	//
 	coverURL, err := h.upload.UploadImage(input.CoverImage)
 	if err != nil {
 		renderError(w, r, http.StatusBadRequest, "Cover Image upload failed", err)

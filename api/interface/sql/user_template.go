@@ -1,13 +1,13 @@
 package sql
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-
 	"basic-service/domain"
 	"basic-service/gen/db/model"
 	"basic-service/gen/db/table"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 
 	"braces.dev/errtrace"
 	"github.com/go-jet/jet/v2/sqlite"
@@ -245,9 +245,11 @@ func (r *UserTemplateRepository) marshalMessageTemplate(msgTemplates []domain.Me
 	if msgTemplates == nil {
 		return "[]", nil
 	}
+	fmt.Println("Marshalling Message Template:", msgTemplates)
 	msgTemplateJSON, err := json.Marshal(msgTemplates)
 	if err != nil {
 		return "", errtrace.Wrap(err)
 	}
+	fmt.Println("Marshalled Message Template JSON:", string(msgTemplateJSON))
 	return string(msgTemplateJSON), nil
 }

@@ -71,7 +71,7 @@ const callAdmin = (data) => {
           }) : 'Free' }}/{{
             item.price_interval }}
         </p>
-        <Button label="Call Admin" @click="callAdmin(item)" icon="pi pi-phone" size="small" />
+        <Button label="Chat Admin" @click="callAdmin(item)" icon="pi pi-phone" size="small" />
       </div>
     </template>
   </Card>

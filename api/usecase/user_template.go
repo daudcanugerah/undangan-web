@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"basic-service/domain"
@@ -24,12 +25,18 @@ type UserTemplateList struct {
 	Data  []domain.UserTemplate
 }
 
-func (p *UserTemplate) List(ctx context.Context, page, limit int) (UserTemplateList, error) {
+func (p *UserTemplate) List(ctx context.Context, page, limit int, userID string) (UserTemplateList, error) {
 	var result UserTemplateList
-	claims, err := GetClaimFromContext(ctx)
-	if err != nil {
-		return result, errtrace.Wrap(errors.New("invalid token claims"))
+
+	if userID == "" {
+		claims, err := GetClaimFromContext(ctx)
+		if err != nil {
+			return result, errtrace.Wrap(errors.New("invalid token claims"))
+		}
+		userID = claims.UserID
 	}
+
+	fmt.Println("User ID:", userID)
 
 	offset := (page - 1) * limit
 	// Get total count of templates
@@ -40,7 +47,7 @@ func (p *UserTemplate) List(ctx context.Context, page, limit int) (UserTemplateL
 	result.Total = int64(total)
 
 	// Get paginated templates
-	templates, err := p.repo.List(ctx, claims.UserID, offset, limit)
+	templates, err := p.repo.List(ctx, userID, offset, limit)
 	if err != nil {
 		return result, errtrace.Wrap(err)
 	}

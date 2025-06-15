@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"net/http"
-	"path"
-
 	"basic-service/domain"
 	"basic-service/interface/rest/model"
 	"basic-service/usecase"
+	"net/http"
+	"path"
 
 	"github.com/ggicci/httpin"
 	"github.com/go-chi/render"
@@ -85,9 +84,9 @@ func (h *UserTemplate) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserTemplate) List(w http.ResponseWriter, r *http.Request) {
-	input := r.Context().Value(httpin.Input).(*model.PaginationRequest)
+	input := r.Context().Value(httpin.Input).(*model.UserTemplateListRequest)
 
-	data, err := h.cs.List(r.Context(), input.Page, input.Limit)
+	data, err := h.cs.List(r.Context(), input.Page, input.Limit, input.UserID)
 	if err != nil {
 		renderError(w, r, http.StatusBadRequest, "get template list error", err)
 		return

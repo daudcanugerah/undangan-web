@@ -20,6 +20,6 @@ onMounted(async () => {
 
 <template>
   <div class="p-5 mt-10 flex gap-5 flex-wrap justify-center">
-    <CardBox v-for="item in data" :item="item" />
+    <CardBox v-for="item in data.data" :item="item" />
   </div>
 </template>

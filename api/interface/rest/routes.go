@@ -1,11 +1,10 @@
 package rest
 
 import (
-	"net/http"
-
 	"basic-service/interface/rest/handlers"
 	"basic-service/interface/rest/model"
 	"basic-service/usecase"
+	"net/http"
 
 	httpin_integration "github.com/ggicci/httpin/integration"
 
@@ -22,6 +21,7 @@ func SetupRouter(
 	publicTemplateCase *usecase.PublicTemplateUseCase,
 	userTemplateCase *usecase.UserTemplate,
 	guestCase *usecase.GuestUsecase,
+	userCase *usecase.UserUsecase,
 ) *chi.Mux {
 	r := chi.NewRouter()
 	// Middleware
@@ -46,6 +46,7 @@ func SetupRouter(
 	publicTemplateHandler := handlers.NewPublicTemplate(publicTemplateCase, uploadHandler)
 	userTemplateHandler := handlers.NewUserTemplate(userTemplateCase, uploadHandler)
 	guestHandler := handlers.NewGuest(guestCase)
+	userHandler := handlers.NewUserHandler(userCase)
 
 	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./public/uploads"))))
 	r.Handle("/u/*", http.StripPrefix("/u/", http.FileServer(http.Dir("./public/template"))))
@@ -71,7 +72,7 @@ func SetupRouter(
 			r.With(httpin.NewInput(model.PaginationRequest{})).Get("/public-templates", publicTemplateHandler.List)
 			r.With(httpin.NewInput(model.PublicTemplateCreateRequest{})).Post("/public-templates", publicTemplateHandler.Create)
 
-			r.With(httpin.NewInput(model.PaginationRequest{})).Get("/user-templates", userTemplateHandler.List)
+			r.With(httpin.NewInput(model.UserTemplateListRequest{})).Get("/user-templates", userTemplateHandler.List)
 			r.With(httpin.NewInput(model.UserTemplateCreateRequest{})).Post("/user-templates", userTemplateHandler.Create)
 
 			r.With(httpin.NewInput(model.GuestListRequest{})).Get("/guests", guestHandler.List)
@@ -79,7 +80,7 @@ func SetupRouter(
 
 			// r.Delete("/guests/{id}", guestHandler.Delete)
 			// // User Manager
-			// r.Get("/users", handlers.ListUsers)
+			r.With(httpin.NewInput(model.PaginationRequest{})).Get("/users", userHandler.ListUser)
 			// r.Patch("/users", handlers.ChangeUserState)
 			// r.Get("/users/{id}", handlers.GetUser)
 			//

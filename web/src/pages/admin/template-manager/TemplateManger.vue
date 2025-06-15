@@ -1,19 +1,13 @@
   <script setup>
-  import { storeToRefs } from 'pinia'
   import time from '@/pkg/time';
-  import { useToast } from 'primevue/usetoast';
-  import { ref, onMounted } from 'vue';
-  import { useTemplateManagerStore } from '@/stores/TemplateManagerStore';
-  import DeleteDialog from '@/pages/admin/template-manager/DeleteDialog.vue';
-  import UpdateDialog from '@/pages/admin/template-manager/UpdateDialog.vue';
-  //
+  import { ref, onMounted, computed } from 'vue';
+  import AddDialog from '@/pages/admin/template-manager/AddDialog.vue';
 
+  import { useTemplateManagerStore } from '@/stores/TemplateManagerStore';
   const templateManagerStore = useTemplateManagerStore()
 
   const dt = ref();
-  const { list: templateList } = storeToRefs(templateManagerStore)
   const templateDialogData = ref({})
-
   const deleteTemplateManagerDialog = ref(false);
   const updateTemplateManagerDialog = ref(false);
 
@@ -32,17 +26,19 @@
     deleteTemplateManagerDialog.value = true
   }
 
+  const templateData = computed(() => {
+    return templateManagerStore.getList();
+  })
+
   onMounted(() => {
-    templateManagerStore.fetch()
+    templateManagerStore.fetchTemplates()
   })
 
 
 </script>
 
-
   <template>
-    <DeleteDialog v-model:visible="deleteTemplateManagerDialog" :userData="templateDialogData" />
-    <UpdateDialog v-model:visible="updateTemplateManagerDialog" :userData="templateDialogData" />
+    <AddDialog v-model:visible="updateTemplateManagerDialog" />
 
     <div class="card overflow-scroll w-full p-10">
       <Toolbar class="mb-6 mt-6">
@@ -56,7 +52,7 @@
         </template>
       </Toolbar>
 
-      <DataTable ref="dt" v-model:selection="selectedTemplateManagers" :value="templateList" dataKey="id"
+      <DataTable ref="dt" v-model:selection="selectedTemplateManagers" :value="templateData.data" dataKey="id"
         :paginator="true" size="small" :rows="10" :filters="filters"
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         :rowsPerPageOptions="[5, 10, 25]"

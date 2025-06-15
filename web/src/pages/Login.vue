@@ -49,7 +49,6 @@ const onFormSubmit = async ({ valid, values }) => {
     }
 
     const activeUser = authUserStore.getActiveUser()
-    console.log(activeUser)
     if (activeUser.role == 2) {
       router.push({ name: 'user.myTemplate' })
     } else if (activeUser.role == 1) {
